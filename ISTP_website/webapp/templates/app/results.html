@@ -1,0 +1,10 @@
+{% if qol_data %}
+    <h2>Quality of Life Data for {{ qol_data.name }}</h2>
+    <div>
+        {% for key, value in qol_data.items %}
+            <p><strong>{{ key }}:</strong> {{ value }}</p>
+        {% endfor %}
+    </div>
+{% else %}
+    <p>No data available for the selected criteria.</p>
+{% endif %}

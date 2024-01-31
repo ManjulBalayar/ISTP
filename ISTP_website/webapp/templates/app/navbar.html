@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        .bg-cardinal {
+            background-color: #8C1D40;
+        }
+                /* Gold color for the text */
+        .navbar.bg-cardinal .navbar-brand {
+            color: #FFC72C; /* Gold color */
+        }
+        .navbar.bg-cardinal .navbar-nav .nav-link,
+        .navbar.bg-cardinal .navbar-toggler-icon {
+            color: #FFC72C; /* Gold color */
+        }
+
+        /* Gold color for the text with a hover effect */
+        .navbar.bg-cardinal .navbar-nav .nav-link:hover,
+        .navbar.bg-cardinal .navbar-toggler:hover {
+            color: #FFC72C; /* Gold color */
+            background-color: rgba(255, 199, 44, 0.1); /* Slight gold shade on hover */
+        }
+
+        /* Active link gold color with a cardinal background */
+        .navbar.bg-cardinal .navbar-nav .nav-link.active {
+            color: #FFC72C; /* Cardinal color */
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-cardinal">
+        <div class="container-fluid">
+          <a class="navbar-brand" href="{% url 'home'%}">Iowa Small Towns Project</a>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+              <li class="nav-item">
+                <a class="nav-link active" aria-current="page" href="{% url 'home'%}">Home</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="{% url 'index'%}">Data</a>
+              </li>
+              <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                  About
+                </a>
+                <ul class="dropdown-menu">
+                  <li><a class="dropdown-item" href="#">Methodology</a></li>
+                  <li><a class="dropdown-item" href="#">Staff</a></li>
+                  <li><hr class="dropdown-divider"></li>
+                  <li><a class="dropdown-item" href="#">Something else here</a></li>
+                </ul>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </nav>
+</body>
+</html>
