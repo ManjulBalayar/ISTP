@@ -1,8 +1,8 @@
 from django.shortcuts import render
-from .models import *
+from .models import Qol, Qol1994, Qol2004
 import pandas as pd
 from django.http import JsonResponse
-import os
+import logging
 
 def home(request):
     return render(request, 'app/home.html')
@@ -187,46 +187,57 @@ def get_qol_data_options(request):
         # If qol_data is None, return an empty dictionary or an error message
         return JsonResponse({'error': 'No data found for the selected options.'})
 
+# Setup basic logging
+logger = logging.getLogger(__name__)
+
 def query_data(request):
-    town = request.GET.get('town')
-    specific_demographic = request.GET.get('specific_demographic')
-    qol_data_type = request.GET.get('qol_data_type')
-
-    data_type = request.GET.get('data_type')
-    if data_type != 'qol':
-        # Handle "Other datas..." case
-        return JsonResponse({'message': 'No data to display for the selected data type.'})
-
-    demographic_mapping = {
-        'All respondents': 'ALL',
-        '18-44 years': 'AGE1',
-        '45-64 years': 'AGE2',
-        '65 years and older': 'AGE3',
-        'Men': 'SEX1M',
-        'Women': 'SEX2F',
-        'Lived in town 1-9 years': 'TENURE1',
-        'Lived in town 10-19 years': 'TENURE2',
-        'Lived in town 20 years or more': 'TENURE3',
-        'Income in the 1st-19th percentile': 'INC1',
-        'Income in the 20th-49th percentile': 'INC2',
-        'Income in the 50th-79th percentile': 'INC3',
-        'Income in the 80th-99th percentile': 'INC4'
-    }
-
-    cat_value = demographic_mapping.get(specific_demographic)
-
-    if not cat_value:
-        return JsonResponse({'error': 'Invalid demographic selected.'})
-
-    # Fetch the relevant QOL data based on the selected options
     try:
-        qol_data = Qol.objects.filter(name=town, cat=cat_value).values().first()
+        town = request.GET.get('town')
+        specific_demographic = request.GET.get('specific_demographic')
+        qol_data_type = request.GET.get('qol_data_type')
+        year = request.GET.get('year', '2014')  # Default to 2014
+
+        logger.info(f"Year: {year}, Town: {town}, Demographic: {specific_demographic}, QOL Data Type: {qol_data_type}")
+
+        # Map years to their respective models
+        model_mapping = {
+            '1994': Qol1994,
+            '2004': Qol2004,
+            '2014': Qol
+        }
+
+        QolModel = model_mapping.get(year, Qol)  # Use Qol as default if year is not recognized
+
+
+        demographic_mapping = {
+            'All respondents': 'ALL',
+            '18-44 years': 'AGE1',
+            '45-64 years': 'AGE2',
+            '65 years and older': 'AGE3',
+            'Men': 'SEX1M',
+            'Women': 'SEX2F',
+            'Lived in town 1-9 years': 'TENURE1',
+            'Lived in town 10-19 years': 'TENURE2',
+            'Lived in town 20 years or more': 'TENURE3',
+            'Income in the 1st-19th percentile': 'INC1',
+            'Income in the 20th-49th percentile': 'INC2',
+            'Income in the 50th-79th percentile': 'INC3',
+            'Income in the 80th-99th percentile': 'INC4'
+        }
+
+        if not QolModel:
+            raise ValueError(f"Invalid year: {year}")
+
+        cat_value = demographic_mapping.get(specific_demographic)
+        if not cat_value:
+            return JsonResponse({'error': 'Invalid demographic selected.'})
+
+        qol_data = QolModel.objects.filter(name=town, cat=cat_value).values().first()
         if qol_data:
             qol_ratings = {key: qol_data[key] for key in qol_data if key.startswith(f'qol{qol_data_type.lower()}')}
             return JsonResponse({'qol_ratings': qol_ratings})
         else:
             return JsonResponse({'error': 'No data found for the selected options.'})
-    except Qol.DoesNotExist:
-        return JsonResponse({'error': 'No data found for the selected options.'})
-
-
+    except Exception as e:
+        logger.error(f"Error querying QOL data: {str(e)}")
+        return JsonResponse({'error': 'An error occurred processing your request.'})

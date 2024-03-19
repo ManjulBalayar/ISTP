@@ -66,6 +66,16 @@
 
     <!-- Single Form for Selecting Options and Submitting Data -->
     <form id="selection-form" action="{% url 'query_data' %}" method="get">
+        <!-- Dropdown for Selecting Year -->
+        <label for="year">Select Year:</label>
+        <select name="year" id="year">
+            <option value=""></option>
+            <option value="2014">All</option>
+            <option value="2014">2014</option>
+            <option value="2004">2004</option>
+            <option value="1994">1994</option>
+        </select>
+
         <!-- Dropdown for Selecting Town -->
         <label for="town">Select Town:</label>
         <select name="town" id="town">
@@ -107,6 +117,15 @@
                 <!-- Options will be dynamically loaded -->
             </select>
         </div>
+
+        <!-- Dropdown for Selecting Visualization Type -->
+        <label for="visualization_type">Select Visualization Type:</label>
+        <select name="visualization_type" id="visualization_type">
+            <option value="bar"></option>
+            <option value="bar">Bar Chart</option>
+            <option value="pie">Pie Chart</option>
+            <!-- Add more options here as needed -->
+        </select>
 
         <button type="submit">Visualize</button>
     </form>
@@ -203,6 +222,72 @@
                 .attr("fill", "#333")
                 .style("font-size", "12px")
                 .style("text-anchor", "middle");
+        }
+
+        function renderPieChart(data, qolDataType) {
+            // Clear any existing SVG
+            d3.select("#visualization").selectAll("*").remove();
+
+            var width = 450, height = 450, margin = 40;
+            var radius = Math.min(width, height) / 2 - margin;
+
+            // Append the svg object to the body of the page
+            var svg = d3.select("#visualization")
+            .append("svg")
+                .attr("width", width)
+                .attr("height", height)
+            .append("g")
+                .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
+
+            // Define the new labels and color for each label as in the bar chart
+            var labels = {
+                'vg': 'Very Good',
+                'g': 'Good',
+                'f': 'Fair',
+                'p': 'Poor',
+                'dnk': 'Uncertain',
+                'na': 'None'
+            };
+
+            var colorScale = d3.scaleOrdinal()
+                .domain(Object.values(labels))
+                .range(['#A5D6A7', '#C5E1A5', '#FFF59D', '#FFCC80', '#FFAB91', '#BCAAA4']); 
+
+            // Map data to new labels and colors
+            var formattedData = data.map(function(d) {
+                var newLabel = labels[d.group.split('_').pop()] || 'Unknown'; // Map to new label
+                return { group: newLabel, value: d.value };
+            });
+
+            var pie = d3.pie()
+            .sort(null)
+            .value(function(d) { return d.value; });
+
+            var data_ready = pie(formattedData);
+
+            var arc = d3.arc()
+            .innerRadius(0)
+            .outerRadius(radius);
+
+            svg.selectAll('mySlices')
+            .data(data_ready)
+            .enter()
+            .append('path')
+                .attr('d', arc)
+                .attr('fill', function(d) { return colorScale(d.data.group); }) // Use colorScale for color
+                .attr("stroke", "white")
+                .style("stroke-width", "2px")
+                .style("opacity", 0.7);
+
+            // Add labels to the pie chart
+            svg.selectAll('mySlices')
+            .data(data_ready)
+            .enter()
+            .append('text')
+                .text(function(d){ return d.data.group; })
+                .attr("transform", function(d) { return "translate(" + arc.centroid(d) + ")"; })
+                .style("text-anchor", "middle")
+                .style("font-size", "15px");
         }
 
         $(document).ready(function() {
@@ -306,7 +391,9 @@
                     'town': $('#town').val(),
                     'demographic': $('#demographic').val(),
                     'specific_demographic': $('#specific_demographic').val(),
-                    'data_type': $('#data_type').val()
+                    'data_type': $('#data_type').val(),
+                    'year': $('#year').val(),  // Add the year to the formData
+                    'visualization_type': $('#visualization_type').val() // Capture the selected visualization type
                 };
 
                 if (formData.data_type === 'qol') {
@@ -324,12 +411,18 @@
                             var dataArray = Object.entries(response.qol_ratings).map(function([key, value]) {
                                 return { group: key, value: parseFloat(value) };
                             });
-                            renderBarChart(dataArray, formData['qol_data_type']);
+
+                            // Conditional rendering based on the visualization type
+                            if (formData['visualization_type'] === 'bar') {
+                                renderBarChart(dataArray, formData['qol_data_type']);
+                            } else if (formData['visualization_type'] === 'pie') {
+                                renderPieChart(dataArray, formData['qol_data_type']);
+                            }
 
                             // Smoothly scroll to the visualization section
                             $('html, body').animate({
                                 scrollTop: $("#visualization").offset().top
-                            }, 100); // 1000 milliseconds for the animation
+                            }, 1000); // Adjust the scroll speed if necessary
                         } else if (response.error) {
                             $('#qol-results').append(`<p>Error: ${response.error}</p>`);
                         }
