@@ -20,6 +20,7 @@
         }
 
         form#selection-form {
+            text-align: center;
             max-width: 600px;
             margin: 20px auto;
             padding: 20px;
@@ -59,6 +60,35 @@
         #qol_data_type_container {
             display: none;
         }
+
+        #visualization {
+            display: flex; /* New */
+            justify-content: center; /* New */
+            align-items: center; /* New */
+            height: 500px; /* New: Provide a fixed height */
+            margin: 40px auto;
+        }
+        .legend-box { /* New class for the legend */
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            list-style: none;
+            position: absolute; /* New: position it over the chart if needed */
+            top: 0; /* New: top-right corner */
+            right: 0; /* New: top-right corner */
+            margin: 20px; /* New: give some space from the corner */
+            padding: 0; /* New */
+            background: rgba(255, 255, 255, 0.8); /* New: Optional, for background */
+            border-radius: 8px; /* New: Optional, for rounded corners */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* New: Optional, for shadow */
+        }
+        .legend-box li { /* New: Style the legend items */
+            margin: 0;
+            padding: 5px;
+            font-size: 0.9em; /* Adjust size as needed */
+            color: #333;
+        }
+
     </style>
 </head>
 <body>
@@ -121,7 +151,7 @@
         <!-- Dropdown for Selecting Visualization Type -->
         <label for="visualization_type">Select Visualization Type:</label>
         <select name="visualization_type" id="visualization_type">
-            <option value="bar"></option>
+            <option value=""></option>
             <option value="bar">Bar Chart</option>
             <option value="pie">Pie Chart</option>
             <!-- Add more options here as needed -->
@@ -200,14 +230,20 @@
 
             // Bars
             svg.selectAll("mybar")
-            .data(formattedData)
-            .enter()
-            .append("rect")
-                .attr("x", function(d) { return x(d.group); })
-                .attr("y", function(d) { return y(d.value); })
-                .attr("width", x.bandwidth())
-                .attr("height", function(d) { return height - y(d.value); })
-                .attr("fill", function(d) { return colorScale[d.group]; }); // Assign color based on group
+                .data(formattedData)
+                .enter()
+                .append("rect")
+                    .attr("x", function(d) { return x(d.group); })
+                    .attr("y", height)
+                    .attr("width", x.bandwidth())
+                    .attr("height", 0)
+                    .attr("fill", function(d) { return colorScale[d.group]; }) // Assign color based on group
+                    .transition()
+                    .duration(800)
+                    .attr("y", function(d) { return y(d.value); }) // Corrected to 'd.value'
+                    .attr("height", function(d) { return height - y(d.value); }) // Corrected to 'd.value'
+                    .delay(function(d, i) { return i * 100; }); // Delay for staggering effect
+
 
             // Adding text labels on bars
             svg.selectAll(".text")
@@ -225,21 +261,21 @@
         }
 
         function renderPieChart(data, qolDataType) {
-            // Clear any existing SVG
             d3.select("#visualization").selectAll("*").remove();
 
-            var width = 450, height = 450, margin = 40;
+            var width = 1160, // Increase the width for better spacing
+                height = 650,
+                margin = 100;
             var radius = Math.min(width, height) / 2 - margin;
 
-            // Append the svg object to the body of the page
             var svg = d3.select("#visualization")
-            .append("svg")
+                .append("svg")
                 .attr("width", width)
                 .attr("height", height)
-            .append("g")
-                .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
+                .append("g")
+                // Center the pie chart within the new SVG dimensions
+                .attr("transform", "translate(" + (width / 2 - 50) + "," + height / 2 + ")");
 
-            // Define the new labels and color for each label as in the bar chart
             var labels = {
                 'vg': 'Very Good',
                 'g': 'Good',
@@ -251,43 +287,59 @@
 
             var colorScale = d3.scaleOrdinal()
                 .domain(Object.values(labels))
-                .range(['#A5D6A7', '#C5E1A5', '#FFF59D', '#FFCC80', '#FFAB91', '#BCAAA4']); 
+                .range(['#A5D6A7', '#C5E1A5', '#FFF59D', '#FFCC80', '#FFAB91', '#BCAAA4']);
 
-            // Map data to new labels and colors
             var formattedData = data.map(function(d) {
-                var newLabel = labels[d.group.split('_').pop()] || 'Unknown'; // Map to new label
+                var newLabel = labels[d.group.split('_').pop()] || 'Unknown';
                 return { group: newLabel, value: d.value };
             });
 
-            var pie = d3.pie()
-            .sort(null)
-            .value(function(d) { return d.value; });
-
+            var pie = d3.pie().value(function(d) { return d.value; });
             var data_ready = pie(formattedData);
 
-            var arc = d3.arc()
-            .innerRadius(0)
-            .outerRadius(radius);
+            var arc = d3.arc().innerRadius(0).outerRadius(radius);
 
+            // Append the pie chart slices
             svg.selectAll('mySlices')
-            .data(data_ready)
-            .enter()
-            .append('path')
+                .data(data_ready)
+                .enter()
+                .append('path')
                 .attr('d', arc)
-                .attr('fill', function(d) { return colorScale(d.data.group); }) // Use colorScale for color
+                .attr('fill', function(d) { return colorScale(d.data.group); })
                 .attr("stroke", "white")
                 .style("stroke-width", "2px")
-                .style("opacity", 0.7);
-
-            // Add labels to the pie chart
-            svg.selectAll('mySlices')
-            .data(data_ready)
-            .enter()
-            .append('text')
-                .text(function(d){ return d.data.group; })
-                .attr("transform", function(d) { return "translate(" + arc.centroid(d) + ")"; })
-                .style("text-anchor", "middle")
-                .style("font-size", "15px");
+                .style("opacity", 0.7)
+                // Add mouseover event listener
+                .on("mouseover", function(event, d) {
+                    var target = d3.select(this);
+                    var centroid = arc.centroid(d); // Get the centroid of the slice
+                    var x = centroid[0] * 0.2; // Calculate the x offset
+                    var y = centroid[1] * 0.2; // Calculate the y offset
+                    target.transition()
+                        .duration(700)
+                        .attr('transform', 'translate(' + x + ',' + y + ')')
+                        .style("opacity", 1); // Highlight the slice by increasing opacity
+                    
+                    // Append text label for the hovered slice
+                    svg.append("text")
+                        .attr("transform", "translate(" + arc.centroid(d) + ")")
+                        .attr("dy", "0.35em")
+                        .attr("class", "slice-label") // Use this class to style the text if needed
+                        .style("text-anchor", "middle")
+                        .text(function() {
+                            return d.data.group + ": " + d.data.value; // Display the label and value
+                        });
+                })
+                // Add mouseout event listener
+                .on("mouseout", function() {
+                    d3.select(this).transition()
+                        .duration(400)
+                        .attr('transform', 'translate(0,0)')
+                        .style("opacity", 0.7); // Return to normal opacity
+                    
+                    // Remove the text label
+                    svg.selectAll(".slice-label").remove(); // Remove the label on mouseout
+                });
         }
 
         $(document).ready(function() {
