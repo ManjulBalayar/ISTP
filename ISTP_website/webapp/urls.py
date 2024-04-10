@@ -7,4 +7,5 @@ urlpatterns = [
     path('demographics/', views.get_specific_demographic_options, name="demographics"),
     path('qol-data-options/', views.get_qol_data_options, name="qol_data_options"),
     path('query-data/', views.query_data, name='query_data'),
+    path('search-towns/', views.search_towns, name='search_towns'),
 ]

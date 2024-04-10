@@ -190,6 +190,11 @@ def get_qol_data_options(request):
 # Setup basic logging
 logger = logging.getLogger(__name__)
 
+def search_towns(request):
+    term = request.GET.get('term', '')  # Get the user input from the 'term' GET parameter
+    towns = Qol.objects.filter(name__icontains=term).values_list('name', flat=True).distinct()
+    return JsonResponse(list(towns), safe=False)
+
 def query_data(request):
     try:
         town = request.GET.get('town')
