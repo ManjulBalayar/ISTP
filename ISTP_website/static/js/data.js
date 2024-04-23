@@ -1,3 +1,147 @@
+function renderRadialChart(data, qolDataType) {
+    d3.select("#visualization").selectAll("*").remove();
+
+    const width = 500;
+    const height = 500;
+    const innerRadius = 100;
+    const outerRadius = Math.min(width, height) / 2;
+
+    var colorScale = {
+        'vg': '#A5D6A7',  // Very Good
+        'g': '#C5E1A5',   // Good
+        'f': '#FFF59D',   // Fair
+        'p': '#FFCC80',   // Poor
+        'dnk': '#FFAB91', // Uncertain
+        'na': '#BCAAA4'   // None
+    };
+
+    const svg = d3.select("#visualization").append("svg")
+        .attr("width", width)
+        .attr("height", height)
+        .append("g")
+        .attr("transform", `translate(${width / 2}, ${height / 2})`);
+
+    const x = d3.scaleBand()
+        .range([0, 2 * Math.PI])
+        .domain(data.map(d => d.group))
+        .padding(0.1);
+
+    const y = d3.scaleRadial()
+        .range([innerRadius, outerRadius])
+        .domain([0, d3.max(data, d => d.value)]);
+
+    svg.append("g")
+        .selectAll("path")
+        .data(data)
+        .enter()
+        .append("path")
+        .attr("fill", d => colorScale[d.group]) // Apply color based on group directly
+        .attr("d", d3.arc()
+            .innerRadius(innerRadius)
+            .outerRadius(d => y(d.value))
+            .startAngle(d => x(d.group))
+            .endAngle(d => x(d.group) + x.bandwidth())
+            .padAngle(0.01)
+            .padRadius(innerRadius));
+
+    // Adding labels (optional)
+    svg.append("g")
+        .selectAll("text")
+        .data(data)
+        .enter()
+        .append("text")
+        .attr("text-anchor", "middle")
+        .attr("x", d => (y(d.value) + 10) * Math.sin(x(d.group) + x.bandwidth() / 2))
+        .attr("y", d => -(y(d.value) + 10) * Math.cos(x(d.group) + x.bandwidth() / 2))
+        .text(d => `${d.group} (${d.value})`)
+        .style("font-size", "12px")
+        .attr("fill", "white");
+}
+
+function renderLolipopChart(data, qolDataType) {
+    d3.select("#visualization").selectAll("*").remove();
+
+    var margin = {top: 10, right: 30, bottom: 40, left: 100},
+        width = 460 - margin.left - margin.right,
+        height = 500 - margin.top - margin.bottom;
+
+    var svg = d3.select("#visualization").append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+        .append("g")
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+    var colorScale = {
+        'Very Good': '#A5D6A7',
+        'Good': '#C5E1A5',
+        'Fair': '#FFF59D',
+        'Poor': '#FFCC80',
+        'Uncertain': '#FFAB91',
+        'None': '#BCAAA4'
+    };
+
+    var labels = {
+        'vg': 'Very Good',
+        'g': 'Good',
+        'f': 'Fair',
+        'p': 'Poor',
+        'dnk': 'Uncertain',
+        'na': 'None'
+    };
+
+    var formattedData = data.map(function(d) {
+        var keySuffix = d.group.split('_').pop();
+        var newLabel = labels[keySuffix] || keySuffix;
+        return { group: newLabel, value: d.value };
+    });
+
+    formattedData.sort(function(a, b) {
+        return b.value - a.value;
+    });
+
+    var x = d3.scaleLinear()
+        .domain([0, d3.max(formattedData, function(d) { return d.value; })])
+        .range([0, width]);
+    svg.append("g")
+        .attr("transform", "translate(0," + height + ")")
+        .call(d3.axisBottom(x));
+
+    var y = d3.scaleBand()
+        .range([0, height])
+        .domain(formattedData.map(function(d) { return d.group; }))
+        .padding(1);
+    svg.append("g")
+        .call(d3.axisLeft(y));
+
+    // Lines with animation
+    svg.selectAll("myline")
+        .data(formattedData)
+        .enter()
+        .append("line")
+        .attr("x1", x(0))
+        .attr("x2", x(0))
+        .attr("y1", function(d) { return y(d.group); })
+        .attr("y2", function(d) { return y(d.group); })
+        .attr("stroke", "grey")
+        .transition()
+        .duration(1000)
+        .attr("x1", function(d) { return x(d.value); });
+
+    // Circles with animation
+    svg.selectAll("mycircle")
+        .data(formattedData)
+        .enter()
+        .append("circle")
+        .attr("cx", x(0))
+        .attr("cy", function(d) { return y(d.group); })
+        .attr("r", "7")
+        .style("fill", function(d) { return colorScale[d.group]; })
+        .attr("stroke", "black")
+        .transition()
+        .duration(1000)
+        .attr("cx", function(d) { return x(d.value); });
+}
+
 function renderBarChart(data, qolDataType) {
     // Clear any existing SVG
     d3.select("#visualization").selectAll("*").remove();
@@ -268,7 +412,6 @@ $(document).ready(function() {
 
     $('#selection-form').on('submit', function(event) {
         event.preventDefault();
-
         var formData = {
             'town': $('#town').val(),
             'demographic': $('#demographic').val(),
@@ -299,10 +442,11 @@ $(document).ready(function() {
                         renderBarChart(dataArray, formData['qol_data_type']);
                     } else if (formData['visualization_type'] === 'pie') {
                         renderPieChart(dataArray, formData['qol_data_type']);
-                    } else if(formData['visualization_type'] == 'map') {
-                        drawMap(response);
-                    }
-
+                    } else if(formData['visualization_type'] === 'lolipop') {
+                        renderLolipopChart(dataArray, formData['qol_data_type'])
+                    } else if(formData['visualization_type'] === 'radial') {
+                        renderRadialChart(dataArray, formData['qol_data_type'])
+                    } 
                     // Smoothly scroll to the visualization section
                     $('html, body').animate({
                         scrollTop: $("#visualization").offset().top

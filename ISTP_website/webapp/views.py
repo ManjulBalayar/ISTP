@@ -3,6 +3,8 @@ from .models import Qol, Qol1994, Qol2004
 import pandas as pd
 from django.http import JsonResponse
 import logging
+from django.db.models import Q
+
 
 def home(request):
     return render(request, 'app/home.html')
@@ -211,8 +213,19 @@ def query_data(request):
             '2014': Qol
         }
 
-        QolModel = model_mapping.get(year, Qol)  # Use Qol as default if year is not recognized
+        results = {}
+        if year == 'All':
+            for yr, model in model_mapping.items():
+                qol_data = model.objects.filter(name=town, cat=specific_demographic).values().first()
+                if qol_data:
+                    results[yr] = {key: qol_data[key] for key in qol_data if key.startswith(f'qol{qol_data_type.lower()}')}
+        else:
+            model = model_mapping.get(year)
+            qol_data = model.objects.filter(name=town, cat=specific_demographic).values().first()
+            if qol_data:
+                results[year] = {key: qol_data[key] for key in qol_data if key.startswith(f'qol{qol_data_type.lower()}')}
 
+        QolModel = model_mapping.get(year, Qol2004)  # Use Qol as default if year is not recognized
 
         demographic_mapping = {
             'All respondents': 'ALL',
