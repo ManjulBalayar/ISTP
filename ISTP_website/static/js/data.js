@@ -7,13 +7,29 @@ function renderRadialChart(data, qolDataType) {
     const outerRadius = Math.min(width, height) / 2;
 
     var colorScale = {
-        'vg': '#A5D6A7',  // Very Good
-        'g': '#C5E1A5',   // Good
-        'f': '#FFF59D',   // Fair
-        'p': '#FFCC80',   // Poor
-        'dnk': '#FFAB91', // Uncertain
-        'na': '#BCAAA4'   // None
+        'Very Good': '#A5D6A7',
+        'Good': '#C5E1A5',
+        'Fair': '#FFF59D',
+        'Poor': '#FFCC80',
+        'Uncertain': '#FFAB91',
+        'None': '#BCAAA4'
     };
+
+    var labels = {
+        'vg': 'Very Good',
+        'g': 'Good',
+        'f': 'Fair',
+        'p': 'Poor',
+        'dnk': 'Uncertain',
+        'na': 'None'
+    };
+
+    // Map data to new labels
+    var formattedData = data.map(function(d) {
+        var keySuffix = d.group.split('_').pop(); // Extract suffix (e.g., 'vg', 'g')
+        var newLabel = labels[keySuffix] || keySuffix; // Map to new label or keep original
+        return { group: newLabel, value: d.value };
+    });
 
     const svg = d3.select("#visualization").append("svg")
         .attr("width", width)
@@ -23,19 +39,19 @@ function renderRadialChart(data, qolDataType) {
 
     const x = d3.scaleBand()
         .range([0, 2 * Math.PI])
-        .domain(data.map(d => d.group))
+        .domain(formattedData.map(d => d.group))
         .padding(0.1);
 
     const y = d3.scaleRadial()
         .range([innerRadius, outerRadius])
-        .domain([0, d3.max(data, d => d.value)]);
+        .domain([0, d3.max(formattedData, d => d.value)]);
 
     svg.append("g")
         .selectAll("path")
-        .data(data)
+        .data(formattedData)
         .enter()
         .append("path")
-        .attr("fill", d => colorScale[d.group]) // Apply color based on group directly
+        .attr("fill", d => colorScale[d.group])
         .attr("d", d3.arc()
             .innerRadius(innerRadius)
             .outerRadius(d => y(d.value))
@@ -47,7 +63,7 @@ function renderRadialChart(data, qolDataType) {
     // Adding labels (optional)
     svg.append("g")
         .selectAll("text")
-        .data(data)
+        .data(formattedData)
         .enter()
         .append("text")
         .attr("text-anchor", "middle")
@@ -55,7 +71,7 @@ function renderRadialChart(data, qolDataType) {
         .attr("y", d => -(y(d.value) + 10) * Math.cos(x(d.group) + x.bandwidth() / 2))
         .text(d => `${d.group} (${d.value})`)
         .style("font-size", "12px")
-        .attr("fill", "white");
+        .attr("fill", "black");
 }
 
 function renderLolipopChart(data, qolDataType) {
