@@ -43,22 +43,44 @@ form#selection-form button:hover {
     background-color: #0056b3;
 }
 
-#visualization {
-    max-width: 960px;
-    margin: 40px auto;
-}
-
 #qol_data_type_container {
     display: none;
 }
 
 #visualization {
-    display: flex; 
-    justify-content: center; 
-    align-items: center; 
-    height: 500px; 
+    width: 960px;
     margin: 40px auto;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    visibility: hidden; /* Initially hidden and will be made visible after scroll */
 }
+
+.visualization-container {
+    width: 48%; /* Each container takes up almost half the width of the visualization area */
+    height: 300px; /* Adjust the height based on your preference */
+    margin-bottom: 20px; /* Adds space between the rows */
+    background: #fff;
+    border: 1px solid #ccc;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    display: flex;
+    justify-content: center; 
+    align-items: center;
+}
+
+
+#visualization > div {
+    width: 48%; /* Each container takes up almost half the width of the visualization area */
+    height: 300px; /* Adjust the height based on your preference */
+    margin-bottom: 20px; /* Adds space between the rows */
+    background: #fff;
+    border: 1px solid #ccc;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    display: flex;
+    justify-content: center; 
+    align-items: center;
+}
+
 .legend-box { 
     display: flex;
     align-items: center;
@@ -81,4 +103,54 @@ form#selection-form button:hover {
 }
 h4 {
     text-align: center;
+}
+
+.instruction {
+    max-width: 800px;
+    margin: 20px auto;
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.instruction h4 {
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+.instruction ul {
+    list-style: none;
+    padding: 0;
+}
+
+.instruction li {
+    margin-bottom: 8px;
+    line-height: 1.4;
+    text-align: left;
+    padding-left: 1.2em;
+    text-indent: -1.2em;
+}
+
+.instruction li:before {
+    content: "→ ";
+    font-weight: bold;
+    color: #007bff; /* Add a hint of color */
+}
+
+footer {
+    text-align: center;
+    padding: 20px 0;
+    background: #8C1D40; /* Consistent with the navbar color */
+    color: #fff;
+    font-size: 0.9em;
+}
+
+footer a {
+    color: #FFC72C; /* Consistent with the navbar link color */
+    text-decoration: none;
+}
+
+footer a:hover {
+    text-decoration: underline;
 }

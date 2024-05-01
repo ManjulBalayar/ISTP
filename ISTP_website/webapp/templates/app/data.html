@@ -20,17 +20,24 @@
 </head>
 <body data-demographics-url="{% url 'demographics' %}">
     <h1>Data Visualization</h1>
-    <h4>
-        <div>How does this work?</div>
-    </h4>
-
+    <div class="instruction">
+        <h4>How does this work?</h4>
+        <ul>
+            <li><strong>Select the Year:</strong> Choose a year from the available options (1994 to 2024) in ten-year increments.</li>
+            <li><strong>Choose a Town:</strong> Select the town for which you want to view data.</li>
+            <li><strong>Choose a Data Type:</strong> Pick the type of data to view, such as Quality of Life (QOL) or Covid-19 Poll data.</li>
+            <li><strong>Select Demographic Category:</strong> Choose a category like Age, Income, Sex, Tenure, or 'All' for an overall view.</li>
+            <li><strong>Choose Specific Demographic:</strong> Refine your selection by demographic details, e.g., specific age groups.</li>
+            <li><strong>Visualize the Data:</strong> For QOL data, choose a chart type (bar, pie, radial, or horizontal bar chart) or click "Visualize" for other data types.</li>
+        </ul>
+    </div>
     <!-- Single Form for Selecting Options and Submitting Data -->
     <form id="selection-form" action="{% url 'query_data' %}" method="get">
         <!-- Dropdown for Selecting Year -->
         <label for="year">Select Year:</label>
         <select name="year" id="year">
             <option value=""></option>
-            <option value="All">All</option>
+            <!-- <option value="All">All</option> -->
             <option value="2014">2014</option>
             <option value="2004">2004</option>
             <option value="1994">1994</option>
@@ -79,15 +86,14 @@
         </div>
 
         <!-- Dropdown for Selecting Visualization Type -->
-        <label for="visualization_type">Select Visualization Type:</label>
+        <!-- <label for="visualization_type">Select Visualization Type:</label>
         <select name="visualization_type" id="visualization_type">
             <option value=""></option>
             <option value="bar">Bar Chart</option>
             <option value="pie">Pie Chart</option>
             <option value="lolipop">Row Chart</option>
             <option value="radial">Radial Chart</option>
-            <!-- Add more options here as needed -->
-        </select>
+        </select> -->
 
         <button type="submit">Visualize</button>
     </form>
@@ -95,8 +101,23 @@
     <div id="qol-results">
         <!-- Queried data will be displayed here -->
     </div>
-    <div id="visualization" style="width: 960px; height: 600px;"></div>
+    <div id="visualization">
+        <div id="barChartContainer"></div>
+        <div id="pieChartContainer"></div>
+        <div id="lolipopChartContainer"></div>
+        <div id="radialChartContainer"></div>
+    </div>
+    
 </body>
 
-
+<footer>
+    Iowa State College of Agriculture and Life Sciences &nbsp; | &nbsp;
+    <a href="{% url 'home'%}">Home</a> &nbsp; | &nbsp; <a href="{% url 'index'%}">ISTP Data</a> &nbsp; | &nbsp; <a href="#">About</a>
+    <br>
+    302 East Hall &nbsp; | &nbsp; Email: dpeters@iastate.edu
+    <br>
+    510 Farm House Lane &nbsp; | &nbsp; Phone: 515-294-6303
+    <br>
+    Ames, Iowa 50011-1054
+</footer>
 {% endblock %} 

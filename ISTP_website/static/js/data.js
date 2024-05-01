@@ -1,17 +1,18 @@
 function renderRadialChart(data, qolDataType) {
-    d3.select("#visualization").selectAll("*").remove();
+    d3.select("#radialChartContainer").selectAll("*").remove();
 
-    const width = 500;
-    const height = 500;
-    const innerRadius = 100;
-    const outerRadius = Math.min(width, height) / 2;
+    var container = d3.select("#radialChartContainer");
+    const width = parseInt(container.style("width"));
+    const height = parseInt(container.style("height"));
+    const innerRadius = width / 5;  // Example proportion, adjust as needed
+    const outerRadius = Math.min(width, height) / 2 - 20; // Leave some margin
 
     var colorScale = {
         'Very Good': '#A5D6A7',
         'Good': '#C5E1A5',
         'Fair': '#FFF59D',
-        'Poor': '#FFCC80',
-        'Uncertain': '#FFAB91',
+        'Poor': '#FFAB91',
+        'Uncertain': '#FFCC80',
         'None': '#BCAAA4'
     };
 
@@ -24,14 +25,13 @@ function renderRadialChart(data, qolDataType) {
         'na': 'None'
     };
 
-    // Map data to new labels
     var formattedData = data.map(function(d) {
-        var keySuffix = d.group.split('_').pop(); // Extract suffix (e.g., 'vg', 'g')
-        var newLabel = labels[keySuffix] || keySuffix; // Map to new label or keep original
+        var keySuffix = d.group.split('_').pop();
+        var newLabel = labels[keySuffix] || keySuffix;
         return { group: newLabel, value: d.value };
     });
 
-    const svg = d3.select("#visualization").append("svg")
+    const svg = container.append("svg")
         .attr("width", width)
         .attr("height", height)
         .append("g")
@@ -75,24 +75,29 @@ function renderRadialChart(data, qolDataType) {
 }
 
 function renderLolipopChart(data, qolDataType) {
-    d3.select("#visualization").selectAll("*").remove();
+    d3.select("#lolipopChartContainer").selectAll("*").remove();
 
-    var margin = {top: 10, right: 30, bottom: 40, left: 100},
-        width = 460 - margin.left - margin.right,
-        height = 500 - margin.top - margin.bottom;
+    var container = d3.select("#lolipopChartContainer");
+    const containerWidth = parseInt(container.style("width"));
+    const containerHeight = parseInt(container.style("height"));
 
-    var svg = d3.select("#visualization").append("svg")
-        .attr("width", width + margin.left + margin.right)
-        .attr("height", height + margin.top + margin.bottom)
+    // Increase bottom margin to provide more space for x-axis labels
+    var margin = {top: 10, right: 30, bottom: 60, left: 100},
+        width = containerWidth - margin.left - margin.right,
+        height = containerHeight - margin.top - margin.bottom;
+
+    var svg = container.append("svg")
+        .attr("width", containerWidth)
+        .attr("height", containerHeight)
         .append("g")
-        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+        .attr("transform", `translate(${margin.left}, ${margin.top})`);
 
     var colorScale = {
         'Very Good': '#A5D6A7',
         'Good': '#C5E1A5',
         'Fair': '#FFF59D',
-        'Poor': '#FFCC80',
-        'Uncertain': '#FFAB91',
+        'Poor': '#FFAB91',
+        'Uncertain': '#FFCC80',
         'None': '#BCAAA4'
     };
 
@@ -119,7 +124,7 @@ function renderLolipopChart(data, qolDataType) {
         .domain([0, d3.max(formattedData, function(d) { return d.value; })])
         .range([0, width]);
     svg.append("g")
-        .attr("transform", "translate(0," + height + ")")
+        .attr("transform", `translate(0, ${height})`)
         .call(d3.axisBottom(x));
 
     var y = d3.scaleBand()
@@ -136,12 +141,12 @@ function renderLolipopChart(data, qolDataType) {
         .append("line")
         .attr("x1", x(0))
         .attr("x2", x(0))
-        .attr("y1", function(d) { return y(d.group); })
-        .attr("y2", function(d) { return y(d.group); })
+        .attr("y1", d => y(d.group))
+        .attr("y2", d => y(d.group))
         .attr("stroke", "grey")
         .transition()
         .duration(1000)
-        .attr("x1", function(d) { return x(d.value); });
+        .attr("x1", d => x(d.value));
 
     // Circles with animation
     svg.selectAll("mycircle")
@@ -149,33 +154,28 @@ function renderLolipopChart(data, qolDataType) {
         .enter()
         .append("circle")
         .attr("cx", x(0))
-        .attr("cy", function(d) { return y(d.group); })
+        .attr("cy", d => y(d.group))
         .attr("r", "7")
-        .style("fill", function(d) { return colorScale[d.group]; })
+        .style("fill", d => colorScale[d.group])
         .attr("stroke", "black")
         .transition()
         .duration(1000)
-        .attr("cx", function(d) { return x(d.value); });
+        .attr("cx", d => x(d.value));
 }
 
 function renderBarChart(data, qolDataType) {
-    // Clear any existing SVG
-    d3.select("#visualization").selectAll("*").remove();
+    d3.select("#barChartContainer").selectAll("*").remove();
 
-    // Set the dimensions and margins of the graph
-    var margin = {top: 30, right: 30, bottom: 40, left: 50},
-        width = 960 - margin.left - margin.right,
-        height = 500 - margin.top - margin.bottom;
+    var container = d3.select("#barChartContainer");
+    const width = parseInt(container.style("width")) - 100;  // Adjusting for margins
+    const height = parseInt(container.style("height")) - 60;  // Adjusting for margins
 
-    // Append the svg object to the body of the page
-    var svg = d3.select("#visualization").append("svg")
-        .attr("width", width + margin.left + margin.right)
-        .attr("height", height + margin.top + margin.bottom)
-    .append("g")
-        .attr("transform",
-            "translate(" + margin.left + "," + margin.top + ")");
+    var svg = container.append("svg")
+        .attr("width", width + 100)  // Add back margins
+        .attr("height", height + 60)
+        .append("g")
+        .attr("transform", "translate(50, 30)");  // Apply some margins for axis
 
-    // Define the new labels
     var labels = {
         'vg': 'Very Good',
         'g': 'Good',
@@ -185,86 +185,81 @@ function renderBarChart(data, qolDataType) {
         'na': 'None'
     };
 
-    // Define the color for each label
     var colorScale = {
-        'Very Good': '#A5D6A7', // Softer Green
-        'Good': '#C5E1A5', // Softer Light Green
-        'Fair': '#FFF59D', // Softer Yellow
-        'Poor': '#FFCC80', // Softer Orange
-        'Uncertain': '#FFAB91', // Softer Red
-        'None': '#BCAAA4' // Softer Dark Red
+        'Very Good': '#A5D6A7',
+        'Good': '#C5E1A5',
+        'Fair': '#FFF59D',
+        'Poor': '#FFAB91',
+        'Uncertain': '#FFCC80',
+        'None': '#BCAAA4'
     };
 
-    // Map data to new labels
     var formattedData = data.map(function(d) {
-        var keySuffix = d.group.split('_').pop(); // Extract suffix (e.g., 'vg', 'g')
-        var newLabel = labels[keySuffix] || keySuffix; // Map to new label or keep original
+        var keySuffix = d.group.split('_').pop();
+        var newLabel = labels[keySuffix] || keySuffix;
         return { group: newLabel, value: d.value };
     });
 
-    // X axis
     var x = d3.scaleBand()
-    .range([ 0, width ])
-    .domain(formattedData.map(function(d) { return d.group; }))
-    .padding(0.2);
-    svg.append("g")
-    .attr("transform", "translate(0," + height + ")")
-    .call(d3.axisBottom(x))
+        .range([0, width])
+        .domain(formattedData.map(function(d) { return d.group; }))
+        .padding(0.2);
 
-    // Add Y axis
+    svg.append("g")
+        .attr("transform", "translate(0," + height + ")")
+        .call(d3.axisBottom(x));
+
     var y = d3.scaleLinear()
-    .domain([0, 100])
-    .range([ height, 0]);
-    svg.append("g")
-    .call(d3.axisLeft(y));
+        .domain([0, d3.max(formattedData, d => d.value)])
+        .range([height, 0]);
 
-    // Bars
+    svg.append("g")
+        .call(d3.axisLeft(y));
+
+    // Bars with animation
     svg.selectAll("mybar")
         .data(formattedData)
         .enter()
         .append("rect")
-            .attr("x", function(d) { return x(d.group); })
-            .attr("y", height)
+            .attr("x", d => x(d.group))
+            .attr("y", d => height)  // Start bars at the bottom of the axis
             .attr("width", x.bandwidth())
-            .attr("height", 0)
-            .attr("fill", function(d) { return colorScale[d.group]; }) // Assign color based on group
+            .attr("height", 0)  // Initially set height to 0
+            .attr("fill", d => colorScale[d.group])
             .transition()
             .duration(800)
-            .attr("y", function(d) { return y(d.value); }) // Corrected to 'd.value'
-            .attr("height", function(d) { return height - y(d.value); }) // Corrected to 'd.value'
-            .delay(function(d, i) { return i * 100; }); // Delay for staggering effect
-
+            .attr("y", d => y(d.value))  // End position of the bar
+            .attr("height", d => height - y(d.value))  // Proper height of the bar
+            .delay((d, i) => i * 100);  // Stagger the animation
 
     // Adding text labels on bars
     svg.selectAll(".text")
-    .data(formattedData)
-    .enter()
-    .append("text")
-        .attr("class", "label")
-        .attr("x", (function(d) { return x(d.group) + (x.bandwidth() / 2) - 8; }  ))
-        .attr("y", function(d) { return y(d.value) - 5; })
-        .attr("dy", ".75em")
-        .text(function(d) { return d.value; })
-        .attr("fill", "#333")
-        .style("font-size", "12px")
-        .style("text-anchor", "middle");
+        .data(formattedData)
+        .enter()
+        .append("text")
+            .attr("class", "label")
+            .attr("x", d => x(d.group) + x.bandwidth() / 2)
+            .attr("y", d => y(d.value) - 5)
+            .attr("dy", ".75em")
+            .text(d => d.value)
+            .attr("fill", "#333")
+            .style("font-size", "12px")
+            .style("text-anchor", "middle");
 }
 
 function renderPieChart(data, qolDataType) {
-    d3.select("#visualization").selectAll("*").remove();
+    d3.select("#pieChartContainer").selectAll("*").remove();
 
-    var width = 1160, // Increase the width for better spacing
-        height = 650,
-        margin = 100;
-    var radius = Math.min(width, height) / 2 - margin;
+    var container = d3.select("#pieChartContainer");
+    const width = parseInt(container.style("width"));
+    const height = parseInt(container.style("height"));
+    const radius = Math.min(width, height) / 2 - 50; // Adjust radius for margins
 
-    var svg = d3.select("#visualization")
-        .append("svg")
+    var svg = container.append("svg")
         .attr("width", width)
         .attr("height", height)
         .append("g")
-        // Center the pie chart within the new SVG dimensions
-        .attr("transform", "translate(" + (width / 2 - 50) + "," + height / 2 + ")");
+        .attr("transform", `translate(${width / 2}, ${height / 2})`);
 
     var labels = {
         'vg': 'Very Good',
@@ -277,7 +272,7 @@ function renderPieChart(data, qolDataType) {
 
     var colorScale = d3.scaleOrdinal()
         .domain(Object.values(labels))
-        .range(['#A5D6A7', '#C5E1A5', '#FFF59D', '#FFCC80', '#FFAB91', '#BCAAA4']);
+        .range(['#A5D6A7', '#C5E1A5', '#FFF59D', '#FFAB91', '#FFCC80', '#BCAAA4']);
 
     var formattedData = data.map(function(d) {
         var newLabel = labels[d.group.split('_').pop()] || 'Unknown';
@@ -288,48 +283,52 @@ function renderPieChart(data, qolDataType) {
     var data_ready = pie(formattedData);
 
     var arc = d3.arc().innerRadius(0).outerRadius(radius);
+    var arcHover = d3.arc().innerRadius(0).outerRadius(radius + 20); // Hover state
 
-    // Append the pie chart slices
-    svg.selectAll('mySlices')
+    // Append paths
+    var paths = svg.selectAll('path')
         .data(data_ready)
         .enter()
         .append('path')
-        .attr('d', arc)
-        .attr('fill', function(d) { return colorScale(d.data.group); })
+        .attr('fill', d => colorScale(d.data.group))
         .attr("stroke", "white")
         .style("stroke-width", "2px")
         .style("opacity", 0.7)
-        // Add mouseover event listener
-        .on("mouseover", function(event, d) {
-            var target = d3.select(this);
-            var centroid = arc.centroid(d); // Get the centroid of the slice
-            var x = centroid[0] * 0.2; // Calculate the x offset
-            var y = centroid[1] * 0.2; // Calculate the y offset
-            target.transition()
-                .duration(700)
-                .attr('transform', 'translate(' + x + ',' + y + ')')
-                .style("opacity", 1); // Highlight the slice by increasing opacity
-            
-            // Append text label for the hovered slice
-            svg.append("text")
-                .attr("transform", "translate(" + arc.centroid(d) + ")")
-                .attr("dy", "0.35em")
-                .attr("class", "slice-label") // Use this class to style the text if needed
-                .style("text-anchor", "middle")
-                .text(function() {
-                    return d.data.group + ": " + d.data.value; // Display the label and value
-                });
-        })
-        // Add mouseout event listener
-        .on("mouseout", function() {
-            d3.select(this).transition()
-                .duration(400)
-                .attr('transform', 'translate(0,0)')
-                .style("opacity", 0.7); // Return to normal opacity
-            
-            // Remove the text label
-            svg.selectAll(".slice-label").remove(); // Remove the label on mouseout
-        });
+        .attr('d', arc);
+
+    // Append the text label after paths to ensure it's on top
+    var label = svg.append("text")
+        .attr("dy", "0.35em")
+        .attr("class", "slice-label")
+        .style("text-anchor", "middle")
+        .style("opacity", 0)  // Initially hidden
+        .style("font-weight", "bold")  // Make text bold
+        .style("fill", "black")  // Set a high contrast color
+        .style("pointer-events", "none");  // Make text non-interactive
+
+    // Interaction effects
+    paths.on("mouseover", function(event, d) {
+        d3.select(this)
+            .transition()
+            .duration(300)
+            .attr('d', arcHover)
+            .style("opacity", 1);
+
+        // Update text label positions and text based on current slice
+        label.attr("transform", `translate(${arcHover.centroid(d)})`)
+            .text(`${d.data.group}: ${d.data.value}`)
+            .style("opacity", 1);  // Make visible
+    })
+    .on("mouseout", function(d) {
+        d3.select(this)
+            .transition()
+            .duration(300)
+            .attr('d', arc)
+            .style("opacity", 0.7);
+
+        // Hide label
+        label.style("opacity", 0);
+    });
 }
 
 $(document).ready(function() {
@@ -433,47 +432,58 @@ $(document).ready(function() {
             'demographic': $('#demographic').val(),
             'specific_demographic': $('#specific_demographic').val(),
             'data_type': $('#data_type').val(),
-            'year': $('#year').val(),  // Add the year to the formData
-            'visualization_type': $('#visualization_type').val() // Capture the selected visualization type
+            'year': $('#year').val(),
+            'visualization_type': $('#visualization_type').val()
         };
-
+    
         if (formData.data_type === 'qol') {
             formData['qol_data_type'] = $('#qol_data_type').val();
         }
-
-        $.ajax({
-            url: query_data,
-            method: 'GET',
-            data: formData,
-            success: function(response) {
-                console.log(response);
-                $('#qol-results').empty();
-                if (response.qol_ratings) {
-                    var dataArray = Object.entries(response.qol_ratings).map(function([key, value]) {
-                        return { group: key, value: parseFloat(value) };
-                    });
-
-                    // Conditional rendering based on the visualization type
-                    if (formData['visualization_type'] === 'bar') {
+    
+        // Smoothly scroll to the visualization section first
+        $('html, body').animate({
+            scrollTop: $("#visualization").offset().top
+        }, 800, function() {
+            // Prepare visualization area after scroll
+            prepareVisualizationArea();
+            
+            // Fetch data and render charts after scrolling
+            $.ajax({
+                url: query_data,
+                method: 'GET',
+                data: formData,
+                success: function(response) {
+                    if (response.qol_ratings) {
+                        var dataArray = Object.entries(response.qol_ratings).map(([key, value]) => {
+                            return { group: key, value: parseFloat(value) };
+                        });
+                        // Render all charts after the scroll has finished
                         renderBarChart(dataArray, formData['qol_data_type']);
-                    } else if (formData['visualization_type'] === 'pie') {
                         renderPieChart(dataArray, formData['qol_data_type']);
-                    } else if(formData['visualization_type'] === 'lolipop') {
-                        renderLolipopChart(dataArray, formData['qol_data_type'])
-                    } else if(formData['visualization_type'] === 'radial') {
-                        renderRadialChart(dataArray, formData['qol_data_type'])
-                    } 
-                    // Smoothly scroll to the visualization section
-                    $('html, body').animate({
-                        scrollTop: $("#visualization").offset().top
-                    }, 80); // Adjust the scroll speed if necessary
-                } else if (response.error) {
-                    $('#qol-results').append(`<p>Error: ${response.error}</p>`);
+                        renderLolipopChart(dataArray, formData['qol_data_type']);
+                        renderRadialChart(dataArray, formData['qol_data_type']);
+                        // Make visualization area visible
+                        $('#visualization').css('visibility', 'visible');
+                    } else if (response.error) {
+                        $('#visualization').append(`<p>Error: ${response.error}</p>`);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error("Error: " + error);
                 }
-            },
-            error: function(xhr, status, error) {
-                console.error("Error: " + error);
-            }
+            });
         });
     });
+    
+    function prepareVisualizationArea() {
+        // Clear previous charts
+        $('#visualization').empty();
+    
+        // Create containers for each chart type
+        $('<div id="barChartContainer" class="visualization-container"></div>').appendTo('#visualization');
+        $('<div id="pieChartContainer" class="visualization-container"></div>').appendTo('#visualization');
+        $('<div id="lolipopChartContainer" class="visualization-container"></div>').appendTo('#visualization');
+        $('<div id="radialChartContainer" class="visualization-container"></div>').appendTo('#visualization');
+    }
+        
 });
