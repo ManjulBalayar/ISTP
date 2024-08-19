@@ -60,6 +60,15 @@
             <option value="other">Other datas...</option>
         </select>
 
+        <!-- Container for Selecting QOL Data Type -->
+        <div id="qol_data_type_container">
+            <label for="qol_data_type">Select QOL Data Type:</label>
+            <select name="qol_data_type" id="qol_data_type">
+                <option> </option>
+                <!-- Options will be dynamically loaded -->
+            </select>
+        </div>
+
         <!-- Dropdown for Selecting Demographic -->
         <label for="demographic">Select Demographic:</label>
         <select name="demographic" id="demographic">
@@ -75,25 +84,6 @@
             <option> </option>
             <!-- Options will be dynamically loaded based on the main demographic selection -->
         </select>
-
-        <!-- Container for Selecting QOL Data Type -->
-        <div id="qol_data_type_container">
-            <label for="qol_data_type">Select QOL Data Type:</label>
-            <select name="qol_data_type" id="qol_data_type">
-                <option> </option>
-                <!-- Options will be dynamically loaded -->
-            </select>
-        </div>
-
-        <!-- Dropdown for Selecting Visualization Type -->
-        <!-- <label for="visualization_type">Select Visualization Type:</label>
-        <select name="visualization_type" id="visualization_type">
-            <option value=""></option>
-            <option value="bar">Bar Chart</option>
-            <option value="pie">Pie Chart</option>
-            <option value="lolipop">Row Chart</option>
-            <option value="radial">Radial Chart</option>
-        </select> -->
 
         <button type="submit">Visualize</button>
     </form>

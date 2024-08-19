@@ -332,56 +332,27 @@ function renderPieChart(data, qolDataType) {
 }
 
 $(document).ready(function() {
-    $('#data_type').change(function() {
-        var selectedType = $(this).val();
-        if (selectedType === 'qol') {
-            $('#qol_data_type_container').show();
-        } else {
-            $('#qol_data_type_container').hide();
-            $('#qol_data_type').empty().append('<option value="">Select a QOL data type</option>');
-        }
-    });
-
-    $('#demographic').change(function(){
-        var selectedDemographic = $(this).val();
-        // Log the selected demographic
-        console.log("Selected Demographic: " + selectedDemographic);
-        
-        $.ajax({
-            url: demographicsUrl,
-            data: {
-                'demographic': selectedDemographic
-            },
-            dataType: 'json',
-            success: function (data) {
-                var specificDemographicSelect = $('#specific_demographic');
-                specificDemographicSelect.empty();
-                specificDemographicSelect.append('<option value=""></option>');
-                $.each(data.specific_options, function(index, value) {
-                    specificDemographicSelect.append($('<option>', {
-                        value: value, // Use value as the option value
-                        text: value  // Use value as the option text
-                    }));
-                });
+    $(document).ready(function() {
+        // When 'Select Type of Data' changes
+        $('#data_type').change(function() {
+            var selectedType = $(this).val();
+            if (selectedType === 'qol') {
+                // Show 'Select QOL Data Type' and populate it immediately
+                $('#qol_data_type_container').show();
+                populateQOLDataType();  // Populate the QOL Data Type options
+            } else {
+                $('#qol_data_type_container').hide();
+                $('#qol_data_type').empty().append('<option value="">Select a QOL data type</option>');
             }
         });
-    });
-
-    // When specific demographic changes
-    $('#specific_demographic').change(function(){
-        var selectedTown = $('#town').val();
-        var selectedDemographic = $(this).val();
-        // Log the selected specific demographic
-        console.log("Town: " + selectedTown + ", Specific Demographic: " + selectedDemographic);
-
-        var qolDataTypeSelect = $('#qol_data_type');
-        qolDataTypeSelect.empty();
-
-        var qolDataTypeSelect = $('#qol_data_type');
-        qolDataTypeSelect.empty();
-        qolDataTypeSelect.append('<option value="" selected></option>');
-        if (selectedDemographic) {
-            // Simulated QOL data types
+    
+        // Populate QOL Data Type dropdown
+        function populateQOLDataType() {
+            var qolDataTypeSelect = $('#qol_data_type');
+            qolDataTypeSelect.empty();
+            qolDataTypeSelect.append('<option value="" selected> </option>');
+            
+            // Predefined QOL options
             var qolOptions = {
                 'Jobs': 'Jobs',
                 'Medical': 'Medical',
@@ -402,21 +373,38 @@ $(document).ready(function() {
                 'Water': 'Water',
                 'govtsrvall': 'Government Services Overall'
             };
-
+    
+            // Dynamically add QOL options to the dropdown
             $.each(qolOptions, function(key, label) {
                 qolDataTypeSelect.append($('<option>', {
                     value: key,
                     text: label
                 }));
             });
-        } else {
-            qolDataTypeSelect.append($('<option>', {
-                value: '',
-                text: 'Please select a specific demographic'
-            }));
         }
-
-    });
+    
+        // No changes to demographics functionality, this stays the same
+        $('#demographic').change(function() {
+            var selectedDemographic = $(this).val();
+            // Fetch specific demographics based on the selected demographic
+            $.ajax({
+                url: demographicsUrl,
+                data: { 'demographic': selectedDemographic },
+                dataType: 'json',
+                success: function(data) {
+                    var specificDemographicSelect = $('#specific_demographic');
+                    specificDemographicSelect.empty();
+                    specificDemographicSelect.append('<option value=""></option>');
+                    $.each(data.specific_options, function(index, value) {
+                        specificDemographicSelect.append($('<option>', {
+                            value: value,
+                            text: value
+                        }));
+                    });
+                }
+            });
+        });
+    });    
 
     // When QOL data type changes
     $('#qol_data_type').change(function(){
