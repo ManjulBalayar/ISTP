@@ -9,6 +9,8 @@
     <link rel="stylesheet" href="{% static 'css/data.css' %}">
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
     {% load static %}
     <script type="text/javascript">
@@ -38,14 +40,9 @@
             <option value="1994">1994</option>
         </select>
 
-        <label for="town-search">Search for a town:</label>
-        <div class="search-container">
-            <input type="text" id="town-search" placeholder="Enter town name">
-            <button type="button" id="search-button">Search</button>
-        </div>
-
-        <label for="town">Select Town:</label>
-        <select name="town" id="town">
+        <label for="town-search">Select Town:</label>
+        <input type="text" id="town-search" placeholder="Type to search for a town">
+        <select name="town" id="town" style="display: none;">
             <option value=""> </option>
             {% for town in towns %}
                 <option value="{{ town }}">{{ town }}</option>

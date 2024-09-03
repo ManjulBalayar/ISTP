@@ -295,12 +295,45 @@ $(document).ready(function() {
         });
     }
 
+    // New autocomplete functionality for town selection
+    var townInput = $('#town-search');
+    var townSelect = $('#town');
+    var townOptions = townSelect.find('option').map(function() {
+        return { value: $(this).val(), text: $(this).text() };
+    }).get();
+
+    townInput.autocomplete({
+        source: function(request, response) {
+            var term = request.term.toLowerCase();
+            var matches = townOptions.filter(function(option) {
+                return option.text.toLowerCase().indexOf(term) === 0;
+            });
+            response(matches);
+        },
+        minLength: 0,
+        select: function(event, ui) {
+            townInput.val(ui.item.text);
+            townSelect.val(ui.item.value);
+            return false;
+        }
+    }).focus(function() {
+        $(this).autocomplete("search", "");
+    });
+
+    townInput.on('input', function() {
+        var value = $(this).val();
+        var option = townOptions.find(function(option) {
+            return option.text.toLowerCase() === value.toLowerCase();
+        });
+        townSelect.val(option ? option.value : '');
+    });
+
     // Handle the 'Visualize' button press to generate the visualizations
     $('#selection-form').on('submit', function(event) {
         event.preventDefault();
 
         var selectedDemographic = $('#demographic').val();
-        var selectedTown = $('#town').val();
+        var selectedTown = townSelect.val();
         var selectedYear = $('#year').val();
         var selectedQOLType = $('#qol_data_type').val();
         var dataType = $('#data_type').val();
@@ -370,6 +403,7 @@ $(document).ready(function() {
         $('#selection-form select').val('');
         $('#qol_data_type_container').hide();
         $('#qol_data_type').empty().append('<option value=""> </option>');
+        townInput.val('');  // Clear the town search input
     });
 
     // Clear previous charts and prepare the visualization area
@@ -382,39 +416,6 @@ $(document).ready(function() {
         $('html, body').animate({
             scrollTop: $("#visualization").offset().top - 50
         }, 1000);
-    }
-
-    // Town search functionality
-    $('#search-button').on('click', function() {
-        searchTown();
-    });
-
-    $('#town-search').on('keyup', function(e) {
-        if (e.key === 'Enter') {
-            searchTown();
-        }
-    });
-
-    function searchTown() {
-        var searchTerm = $('#town-search').val().toLowerCase();
-        var townSelect = $('#town');
-        var options = townSelect.find('option');
-        var found = false;
-
-        options.each(function() {
-            var town = $(this).text().toLowerCase();
-            if (town.startsWith(searchTerm)) {
-                townSelect.val($(this).val());
-                found = true;
-                return false; // Break the loop
-            }
-        });
-
-        if (found) {
-            townSelect.trigger('change');
-        } else {
-            alert('Town not found. Please try another search term.');
-        }
     }
 
     // Render bar chart function

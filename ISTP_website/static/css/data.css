@@ -58,7 +58,7 @@ form#selection-form {
     background: #fff;
     border-radius: 8px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    text-align: center; /* Center the form contents */
+    text-align: center;
 }
 
 form#selection-form label {
@@ -66,10 +66,11 @@ form#selection-form label {
     margin-bottom: 8px;
     font-weight: 500;
     color: #2c3e50;
-    text-align: left; /* Align labels to the left */
+    text-align: left;
 }
 
-form#selection-form select {
+form#selection-form select,
+#town-search {
     width: 100%;
     padding: 10px;
     margin-bottom: 20px;
@@ -77,6 +78,20 @@ form#selection-form select {
     border-radius: 4px;
     background-color: #fff;
     font-size: 16px;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23007CB2%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px top 50%;
+    background-size: 12px auto;
+}
+
+form#selection-form select:focus,
+#town-search:focus {
+    border-color: #3498db;
+    box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+    outline: none;
 }
 
 .button-container {
@@ -89,7 +104,7 @@ form#selection-form select {
 form#selection-form button {
     display: inline-block;
     width: calc(50% - 5px);
-    max-width: 200px; /* Limit the maximum width of buttons */
+    max-width: 200px;
     padding: 12px;
     border: none;
     border-radius: 4px;
@@ -178,45 +193,44 @@ form#selection-form button:active {
     color: #333;
 }
 
-.search-container {
-    display: flex;
-    margin-bottom: 20px;
-    gap: 10px; /* This adds space between the search bar and button */
-}
-
-#town-search {
-    flex-grow: 1;
-    padding: 10px;
-    font-size: 16px;
+/* Styling for jQuery UI Autocomplete */
+.ui-autocomplete {
+    max-height: 200px;
+    overflow-y: auto;
+    overflow-x: hidden;
     border: 1px solid #ddd;
-    border-radius: 4px; /* Changed from 4px 0 0 4px to make it fully rounded */
+    border-radius: 0 0 4px 4px;
+    background-color: #fff;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-#search-button {
-    padding: 10px 20px;
-    font-size: 16px;
-    background-color: #3498db;
-    color: white;
-    border: none;
-    border-radius: 4px; /* Changed from 0 4px 4px 0 to make it fully rounded */
+.ui-autocomplete .ui-menu-item {
+    padding: 8px 10px;
+    font-size: 14px;
+    color: #333;
     cursor: pointer;
-    transition: background-color 0.3s;
+    transition: background-color 0.2s;
 }
 
-#search-button:hover {
-    background-color: #2980b9;
+.ui-autocomplete .ui-menu-item:hover,
+.ui-autocomplete .ui-state-focus {
+    background-color: #f0f0f0;
+}
+
+.ui-helper-hidden-accessible {
+    display: none;
 }
 
 footer {
     text-align: center;
     padding: 20px 0;
-    background: #8C1D40; /* Consistent with the navbar color */
+    background: #8C1D40;
     color: #fff;
     font-size: 0.9em;
 }
 
 footer a {
-    color: #FFC72C; /* Consistent with the navbar link color */
+    color: #FFC72C;
     text-decoration: none;
 }
 
