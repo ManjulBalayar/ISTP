@@ -18,7 +18,6 @@
     <script src="{% static 'js/data.js' %}"></script>
 </head>
 <body data-demographics-url="{% url 'demographics' %}">
-    <h1>Data Visualization</h1>
     <div class="instruction">
         <h4>How does this work?</h4>
         <ul>
@@ -26,8 +25,8 @@
             <li><strong>Choose a Town:</strong> Select the town for which you want to view data.</li>
             <li><strong>Choose a Data Type:</strong> Pick the type of data to view, such as Quality of Life (QOL) or Covid-19 Poll data.</li>
             <li><strong>Select Demographic Category:</strong> Choose a category like Age, Income, Sex, Tenure, or 'All' for an overall view.</li>
-            <li><strong>Choose Specific Demographic:</strong> Refine your selection by demographic details, e.g., specific age groups.</li>
-            <li><strong>Visualize the Data:</strong> For QOL data, choose a chart type (bar, pie, radial, or horizontal bar chart) or click "Visualize" for other data types.</li>
+            <li><strong>Visualize the data:</strong> Click "Visualize" to visualize the data in a bar graph.</li>
+            <li><strong>Reset Options:</strong> You may reset your options by clicking on the "Reset Options" button. This will clear all your options and you select different values.</li>
         </ul>
     </div>
     <form id="selection-form" action="{% url 'query_data' %}" method="get">
@@ -38,6 +37,12 @@
             <option value="2004">2004</option>
             <option value="1994">1994</option>
         </select>
+
+        <label for="town-search">Search for a town:</label>
+        <div class="search-container">
+            <input type="text" id="town-search" placeholder="Enter town name">
+            <button type="button" id="search-button">Search</button>
+        </div>
 
         <label for="town">Select Town:</label>
         <select name="town" id="town">
@@ -85,7 +90,7 @@
     
 </body>
 
-<footer>
+<!-- <footer>
     Iowa State College of Agriculture and Life Sciences &nbsp; | &nbsp;
     <a href="{% url 'home'%}">Home</a> &nbsp; | &nbsp; <a href="{% url 'index'%}">ISTP Data</a> &nbsp; | &nbsp; <a href="#">About</a>
     <br>
@@ -94,5 +99,5 @@
     510 Farm House Lane &nbsp; | &nbsp; Phone: 515-294-6303
     <br>
     Ames, Iowa 50011-1054
-</footer>
+</footer> -->
 {% endblock %}

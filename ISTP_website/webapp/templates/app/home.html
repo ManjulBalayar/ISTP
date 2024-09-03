@@ -1,97 +1,29 @@
 {% extends 'app/base.html' %}
+{% load static %}
 
 {% block content %}
-<style>
-    body {
-        font-family: 'Arial', sans-serif;
-        background-color: #f8f8f8;
-        color: #333;
-    }
+<div class="bg-gray-50 min-h-screen">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div class="bg-white shadow-xl rounded-lg overflow-hidden">
+            <div class="px-4 py-5 sm:p-6">
+                <img src="{% static 'css/ISTP_Logo.png' %}" alt="ISTP Logo" class="mx-auto mb-8" style="max-width: 400px; height: auto;">
+                
+                <section class="mb-12">
+                    <h2 class="text-2xl font-semibold text-gray-800 mb-4">About the Project</h2>
+                    <p class="text-gray-600 leading-relaxed">
+                        The Iowa Small Towns Project is an integrated research and extension effort to better understand the conditions and issues facing small Midwestern communities in the 21st century. Since 1994, residents living in 99 Iowa small towns (expanded to 125 in 2024) have been surveyed to learn about their assessment of local services and amenities, social conditions, participation in local organizations, and perceptions of local quality of life. To our knowledge, no other project examines aspects of community life for such a large number of small towns over two decades. This allows us to provide truly unique insights into the changes occurring in small towns across Iowa and the Midwest.
+                    </p>
+                </section>
 
-    h1 {
-        text-align: center;
-        margin-top: 50px;
-        margin-bottom: 20px;
-        color: #8C1D40; /* Red theme for the project title */
-        font-size: 2.5em;
-    }
-
-    h2 {
-        text-align: center;
-        margin-top: 40px;
-        font-size: 2em;
-        color: #D4AC0D; /* Gold color for section headers */
-    }
-
-    .content {
-        max-width: 800px;
-        margin: auto;
-        background: white;
-        padding: 20px;
-        border-radius: 8px;
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    }
-
-    .content img {
-        display: block;
-        margin: 20px auto; /* Center the image */
-        max-width: 100%; /* Responsive image width */
-        height: auto; /* Maintain aspect ratio */
-    }
-
-    footer {
-        text-align: center;
-        padding: 20px 0;
-        background: #8C1D40; /* Consistent with the navbar color */
-        color: #fff;
-        font-size: 0.9em;
-    }
-
-    footer a {
-        color: #FFC72C; /* Consistent with the navbar link color */
-        text-decoration: none;
-    }
-
-    footer a:hover {
-        text-decoration: underline;
-    }
-</style>
-{% load static %}
-<br>
-<br>
-<div class="content">
-    <h1>Iowa Small Towns Project</h1>
-    <img src="{% static 'css/ISTP_Logo.png' %}" alt="ISTP Logo" style="width:400px; height:auto; display: block; margin: 20px auto;">
-    <h2>About the Project</h2>
-    <p>
-        The Iowa Small Towns Project is an integrated research and extension effort to better understand the conditions and issues facing small Midwestern communities in the 21st century.
-        Since 1994, residents living in 99 Iowa small towns (expanded to 125 in 2024) have been surveyed to learn about their assessment of local services and amenities, social conditions,
-        participation in local organizations, and perceptions of local quality of life. To our knowledge, no other project examines aspects of community life for such a large number of
-        small towns over two decades. This allows us to provide truly unique insights into the changes occurring in small towns across Iowa and the Midwest.
-    </p>
-
-    <h2>Methodology</h2>
-    <p>
-        The ISTP is a longitudinal trend study that follows the same communities over time, but with different participants in each wave. For the 1994, 2004, and 2014 waves a two-stage
-        sampling design was used. The town sample in 1994 randomly selected one small town in each of Iowa’s 99 counties. The sampling frame in each county consisted of all municipalities
-        with populations between 500 and 10,000 people that were not adjacent to a metropolitan city of 50,000 or more, based on the 1990 Census. The household sample randomly selected
-        150 housing units in the ZIP postal code area for each of the 99 towns.
-        <!-- Additional text here -->
-    </p>
-    {% load static %}
-    <img src="{% static 'css/Method.png' %}" alt="Methodology Image" style="width:500px; height:auto;">
+                <section class="mb-12">
+                    <h2 class="text-2xl font-semibold text-gray-800 mb-4">Methodology</h2>
+                    <p class="text-gray-600 leading-relaxed mb-4">
+                        The ISTP is a longitudinal trend study that follows the same communities over time, but with different participants in each wave. For the 1994, 2004, and 2014 waves a two-stage sampling design was used. The town sample in 1994 randomly selected one small town in each of Iowa's 99 counties. The sampling frame in each county consisted of all municipalities with populations between 500 and 10,000 people that were not adjacent to a metropolitan city of 50,000 or more, based on the 1990 Census. The household sample randomly selected 150 housing units in the ZIP postal code area for each of the 99 towns.
+                    </p>
+                    <img src="{% static 'css/Method.png' %}" alt="Methodology Image" class="mx-auto rounded-lg shadow-md" style="max-width: 500px; height: auto;">
+                </section>
+            </div>
+        </div>
+    </div>
 </div>
-<br>
-<br>
-<br>
-<footer>
-    Iowa State College of Agriculture and Life Sciences &nbsp; | &nbsp;
-    <a href="{% url 'home'%}">Home</a> &nbsp; | &nbsp; <a href="{% url 'index'%}">ISTP Data</a> &nbsp; | &nbsp; <a href="#">About</a>
-    <br>
-    302 East Hall &nbsp; | &nbsp; Email: <a href="mailto:dpeters@iastate.edu">dpeters@iastate.edu</a>
-    <br>
-    510 Farm House Lane &nbsp; | &nbsp; Phone: 515-294-6303
-    <br>
-    Ames, Iowa 50011-1054
-</footer>
 {% endblock %}

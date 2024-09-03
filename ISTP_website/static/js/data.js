@@ -384,6 +384,39 @@ $(document).ready(function() {
         }, 1000);
     }
 
+    // Town search functionality
+    $('#search-button').on('click', function() {
+        searchTown();
+    });
+
+    $('#town-search').on('keyup', function(e) {
+        if (e.key === 'Enter') {
+            searchTown();
+        }
+    });
+
+    function searchTown() {
+        var searchTerm = $('#town-search').val().toLowerCase();
+        var townSelect = $('#town');
+        var options = townSelect.find('option');
+        var found = false;
+
+        options.each(function() {
+            var town = $(this).text().toLowerCase();
+            if (town.startsWith(searchTerm)) {
+                townSelect.val($(this).val());
+                found = true;
+                return false; // Break the loop
+            }
+        });
+
+        if (found) {
+            townSelect.trigger('change');
+        } else {
+            alert('Town not found. Please try another search term.');
+        }
+    }
+
     // Render bar chart function
     function renderBarChart(dataArray, containerId, demographicLabel) {
         d3.select("#" + containerId).selectAll("*").remove();
