@@ -1,122 +1,33 @@
 body {
-    font-family: Arial, sans-serif;
-    background-color: #f4f4f4;
+    font-family: 'Roboto', Arial, sans-serif;
+    background-color: #f8f9fa;
     color: #333;
     line-height: 1.6;
+    margin: 0;
+    padding: 0;
 }
 
 h1 {
     text-align: center;
-    margin-top: 20px;
-}
-
-form#selection-form {
-    text-align: center;
-    max-width: 600px;
-    margin: 20px auto;
-    padding: 20px;
-    background: #fff;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-form#selection-form label,
-form#selection-form select {
-    display: block;
-    width: 100%;
-    margin-bottom: 10px;
-}
-
-form#selection-form button {
-    display: block;
-    width: 100%;
-    padding: 10px;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 16px;
-}
-
-form#selection-form button:hover {
-    background-color: #0056b3;
-}
-
-#qol_data_type_container {
-    display: none;
-}
-
-#visualization {
-    width: 960px;
-    margin: 40px auto;
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    visibility: hidden; /* Initially hidden and will be made visible after scroll */
-}
-
-.visualization-container {
-    width: 48%; /* Each container takes up almost half the width of the visualization area */
-    height: 300px; /* Adjust the height based on your preference */
-    margin-bottom: 20px; /* Adds space between the rows */
-    background: #fff;
-    border: 1px solid #ccc;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    display: flex;
-    justify-content: center; 
-    align-items: center;
-}
-
-
-#visualization > div {
-    width: 48%; /* Each container takes up almost half the width of the visualization area */
-    height: 300px; /* Adjust the height based on your preference */
-    margin-bottom: 20px; /* Adds space between the rows */
-    background: #fff;
-    border: 1px solid #ccc;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    display: flex;
-    justify-content: center; 
-    align-items: center;
-}
-
-.legend-box { 
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    list-style: none;
-    position: absolute; 
-    top: 0; 
-    right: 0; 
-    margin: 20px; 
-    padding: 0; 
-    background: rgba(255, 255, 255, 0.8); 
-    border-radius: 8px; 
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-.legend-box li { 
-    margin: 0;
-    padding: 5px;
-    font-size: 0.9em; 
-    color: #333;
-}
-h4 {
-    text-align: center;
+    margin: 40px 0;
+    color: #2c3e50;
+    font-weight: 300;
 }
 
 .instruction {
     max-width: 800px;
-    margin: 20px auto;
+    margin: 30px auto;
     background: #fff;
-    padding: 20px;
+    padding: 30px;
     border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .instruction h4 {
-    margin-bottom: 10px;
+    margin-bottom: 20px;
     text-align: center;
+    color: #2c3e50;
+    font-weight: 500;
 }
 
 .instruction ul {
@@ -125,17 +36,146 @@ h4 {
 }
 
 .instruction li {
-    margin-bottom: 8px;
-    line-height: 1.4;
+    margin-bottom: 12px;
+    line-height: 1.5;
     text-align: left;
-    padding-left: 1.2em;
-    text-indent: -1.2em;
+    padding-left: 1.5em;
+    position: relative;
 }
 
 .instruction li:before {
-    content: "→ ";
+    content: "→";
+    position: absolute;
+    left: 0;
+    color: #3498db;
     font-weight: bold;
-    color: #007bff; /* Add a hint of color */
+}
+
+form#selection-form {
+    max-width: 600px;
+    margin: 30px auto;
+    padding: 30px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    text-align: center; /* Center the form contents */
+}
+
+form#selection-form label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #2c3e50;
+    text-align: left; /* Align labels to the left */
+}
+
+form#selection-form select {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 20px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background-color: #fff;
+    font-size: 16px;
+}
+
+.button-container {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+form#selection-form button {
+    display: inline-block;
+    width: calc(50% - 5px);
+    max-width: 200px; /* Limit the maximum width of buttons */
+    padding: 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 500;
+    transition: background-color 0.3s, transform 0.1s;
+}
+
+form#selection-form button[type="submit"] {
+    background-color: #3498db;
+    color: white;
+}
+
+form#selection-form button[type="submit"]:hover {
+    background-color: #2980b9;
+}
+
+form#selection-form button#reset-form {
+    background-color: #95a5a6;
+    color: white;
+}
+
+form#selection-form button#reset-form:hover {
+    background-color: #7f8c8d;
+}
+
+form#selection-form button:active {
+    transform: translateY(1px);
+}
+
+#qol_data_type_container {
+    display: none;
+}
+
+#visualization {
+    width: 100%;
+    max-width: 1200px;
+    margin: 40px auto;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 30px;
+    visibility: hidden;
+}
+
+.visualization-container {
+    width: calc(50% - 15px);
+    padding: 20px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    position: relative;
+    overflow: visible;
+}
+
+@media (max-width: 1024px) {
+    .visualization-container {
+        width: 100%;
+    }
+}
+
+.chart-label {
+    font-size: 18px;
+    font-weight: 500;
+    margin-bottom: 15px;
+    color: #2c3e50;
+}
+
+.legend-box {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    list-style: none;
+    margin: 20px 0;
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.legend-box li {
+    margin: 5px 10px;
+    font-size: 0.9em;
+    color: #333;
 }
 
 footer {
@@ -153,4 +193,10 @@ footer a {
 
 footer a:hover {
     text-decoration: underline;
+}
+
+text {
+    fill: #333 !important;
+    font-size: 14px !important;
+    font-family: 'Roboto', Arial, sans-serif !important;
 }

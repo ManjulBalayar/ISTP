@@ -5,14 +5,13 @@
 <head>
     <meta charset="UTF-8">
     <title>Data Visualization</title>
-    <!-- Include any necessary CSS or JS files -->
     {% load static %}
     <link rel="stylesheet" href="{% static 'css/data.css' %}">
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
     {% load static %}
     <script type="text/javascript">
-        // Define global JS variable for URLs
         var demographicsUrl = "{% url 'demographics' %}";
         var query_data = "{% url 'query_data' %}";
     </script>
@@ -31,61 +30,50 @@
             <li><strong>Visualize the Data:</strong> For QOL data, choose a chart type (bar, pie, radial, or horizontal bar chart) or click "Visualize" for other data types.</li>
         </ul>
     </div>
-    <!-- Single Form for Selecting Options and Submitting Data -->
     <form id="selection-form" action="{% url 'query_data' %}" method="get">
-        <!-- Dropdown for Selecting Year -->
         <label for="year">Select Year:</label>
         <select name="year" id="year">
             <option value=""></option>
-            <!-- <option value="All">All</option> -->
             <option value="2014">2014</option>
             <option value="2004">2004</option>
             <option value="1994">1994</option>
         </select>
 
-        <!-- Dropdown for Selecting Town -->
         <label for="town">Select Town:</label>
         <select name="town" id="town">
-            <option> </option>
+            <option value=""> </option>
             {% for town in towns %}
                 <option value="{{ town }}">{{ town }}</option>
             {% endfor %}
         </select>
 
-        <!-- Dropdown for Selecting Type of Data -->
         <label for="data_type">Select Type of Data:</label>
         <select name="data_type" id="data_type">
-            <option> </option>
+            <option value=""> </option>
             <option value="qol">Quality of Life</option>
             <option value="other">Other datas...</option>
         </select>
 
-        <!-- Container for Selecting QOL Data Type -->
         <div id="qol_data_type_container">
             <label for="qol_data_type">Select QOL Data Type:</label>
             <select name="qol_data_type" id="qol_data_type">
-                <option> </option>
+                <option value=""> </option>
                 <!-- Options will be dynamically loaded -->
             </select>
         </div>
 
-        <!-- Dropdown for Selecting Demographic -->
         <label for="demographic">Select Demographic:</label>
         <select name="demographic" id="demographic">
-            <option> </option>
+            <option value=""> </option>
             {% for demo in demographics %}
                 <option value="{{ demo }}">{{ demo }}</option>
             {% endfor %}
         </select>
 
-        <!-- Dropdown for Selecting Specific Demographic -->
-        <label for="specific_demographic">Select Specific Demographic:</label>
-        <select name="specific_demographic" id="specific_demographic">
-            <option> </option>
-            <!-- Options will be dynamically loaded based on the main demographic selection -->
-        </select>
-
-        <button type="submit">Visualize</button>
+        <div class="button-container">
+            <button type="submit">Visualize</button>
+            <button type="button" id="reset-form">Reset Options</button>
+        </div>
     </form>
 
     <div id="qol-results">
@@ -93,9 +81,6 @@
     </div>
     <div id="visualization">
         <div id="barChartContainer"></div>
-        <div id="pieChartContainer"></div>
-        <div id="lolipopChartContainer"></div>
-        <div id="radialChartContainer"></div>
     </div>
     
 </body>
@@ -110,4 +95,4 @@
     <br>
     Ames, Iowa 50011-1054
 </footer>
-{% endblock %} 
+{% endblock %}
