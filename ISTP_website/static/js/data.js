@@ -332,13 +332,50 @@ $(document).ready(function() {
     $('#selection-form').on('submit', function(event) {
         event.preventDefault();
 
+        // Clear any existing error messages
+        $('.error-message').remove();
+
         var selectedDemographic = $('#demographic').val();
-        var selectedTown = townSelect.val();
+        var selectedTown = $('#town').val();
         var selectedYear = $('#year').val();
         var selectedQOLType = $('#qol_data_type').val();
         var dataType = $('#data_type').val();
 
-        // Fetch and visualize data for all specific demographics
+        // Validate form inputs
+        var errors = [];
+
+        if (!selectedYear) {
+            errors.push("Please select a year.");
+        }
+
+        if (!selectedTown) {
+            errors.push("Please select a town.");
+        }
+
+        if (!dataType) {
+            errors.push("Please select a type of data.");
+        }
+
+        if (dataType === 'qol' && !selectedQOLType) {
+            errors.push("Please select a QOL data type.");
+        }
+
+        if (!selectedDemographic) {
+            errors.push("Please select a demographic.");
+        }
+
+        // If there are errors, display them and stop the submission
+        if (errors.length > 0) {
+            var errorHtml = '<div class="error-message" style="color: red; margin-bottom: 15px;"><ul>';
+            errors.forEach(function(error) {
+                errorHtml += '<li>' + error + '</li>';
+            });
+            errorHtml += '</ul></div>';
+            $(this).prepend(errorHtml);
+            return;
+        }
+
+        // If all validations pass, proceed with data fetching and visualization
         $.ajax({
             url: demographicsUrl,
             data: { 'demographic': selectedDemographic },
@@ -367,7 +404,7 @@ $(document).ready(function() {
                                 var dataArray = Object.entries(response.qol_ratings).map(([key, value]) => {
                                     return { group: key, value: parseFloat(value) };
                                 });
-
+                
                                 var containerId = 'chart-' + specificDemographic.replace(/\s+/g, '-');
                                 var container = $('<div id="' + containerId + '" class="visualization-container"></div>');
                                 
@@ -375,25 +412,32 @@ $(document).ready(function() {
                                 
                                 $('#visualization').append(container);
                                 
-                                renderBarChart(dataArray, containerId, demographicLabel);
+                                // Pass the additional parameters here to renderBarChart
+                                renderBarChart(dataArray, containerId, demographicLabel, selectedYear, selectedTown, dataType, selectedQOLType);
                                 $('#visualization').css('visibility', 'visible');
-
+                
                                 chartsRendered++;
-
+                
                                 if (chartsRendered === chartsToRender) {
                                     scrollToVisualization();
                                 }
                             } else if (response.error) {
-                                $('#visualization').append(`<p>Error: ${response.error}</p>`);
+                                $('#visualization').append(`<p class="error-message" style="color: red;">Error: ${response.error}</p>`);
                                 chartsRendered++;
                             }
                         },
                         error: function(xhr, status, error) {
                             console.error("Error: " + error);
+                            $('#visualization').append(`<p class="error-message" style="color: red;">Error: Unable to fetch data. Please try again later.</p>`);
                             chartsRendered++;
                         }
                     });
                 });
+                
+            },
+            error: function(xhr, status, error) {
+                console.error("Error fetching demographics: " + error);
+                $('#visualization').append(`<p class="error-message" style="color: red;">Error: Unable to fetch demographic data. Please try again later.</p>`);
             }
         });
     });
@@ -413,24 +457,58 @@ $(document).ready(function() {
 
     // Function to scroll to the visualization area
     function scrollToVisualization() {
-        $('html, body').animate({
-            scrollTop: $("#visualization").offset().top - 50
-        }, 1000);
+        // Wait for a short moment to ensure all charts are rendered
+        setTimeout(function() {
+            var visualizationTop = $("#visualization").offset().top;
+            var windowHeight = $(window).height();
+            var scrollTo = visualizationTop - (windowHeight * 0.1); // Scroll to 10% from the top of the window
+
+            $('html, body').animate({
+                scrollTop: scrollTo
+            }, 300); // Faster scroll duration (300ms instead of 500ms)
+        }, 100); // Short delay to ensure charts are rendered
     }
 
     // Render bar chart function
-    function renderBarChart(dataArray, containerId, demographicLabel) {
+    function renderBarChart(dataArray, containerId, demographicLabel, selectedYear, selectedTown, dataType, selectedQOLType) {
         d3.select("#" + containerId).selectAll("*").remove();
-    
+
         var container = d3.select("#" + containerId);
-        const width = container.node().getBoundingClientRect().width;
-        const height = 300;
+        const margin = { top: 130, right: 50, bottom: 50, left: 50 };
+        const width = container.node().getBoundingClientRect().width - margin.left - margin.right;
+        const height = 400 - margin.top - margin.bottom;
     
+        // Define qolOptions for human-readable labels
+        var qolOptions = {
+            'Jobs': 'Jobs',
+            'Medical': 'Medical',
+            'shop': 'Shopping Options',
+            'k12': 'Public School',
+            'Housing': 'Housing',
+            'Childcare': 'Childcare',
+            'Seniorcare': 'Seniorcare',
+            'Youth': 'Youth Programs',
+            'commsrvall': 'Community Services Overall',
+            'recrentr': 'Recreation and Entertainment',
+            'Police': 'Police',
+            'Fire': 'Fire',
+            'ems': 'Emergency Medical Services',
+            'Streets': 'Condition of Streets',
+            'Parks': 'Condition of Parks',
+            'Garbage': 'Garbage Collection',
+            'Water': 'Water',
+            'govtsrvall': 'Government Services Overall'
+        };
+    
+        // Get the human-readable QOL data type
+        var qolLabel = qolOptions[selectedQOLType] || selectedQOLType; // Default to original if not found in qolOptions
+    
+        // Append an SVG element for the chart with margins
         var svg = container.append("svg")
-            .attr("width", width)
-            .attr("height", height)
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
             .append("g")
-            .attr("transform", "translate(50, 30)");
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")"); // Adjusted translate for more space
     
         var labels = {
             'vg': 'Very Good',
@@ -450,66 +528,93 @@ $(document).ready(function() {
             'None': '#BCAAA4'
         };
     
+        // Format the data
         var formattedData = dataArray.map(function(d) {
             var keySuffix = d.group.split('_').pop();
             var newLabel = labels[keySuffix] || keySuffix;
             return { group: newLabel, value: d.value };
         });
     
+        // X axis
         var x = d3.scaleBand()
-            .range([0, width - 100])
+            .range([0, width])
             .domain(formattedData.map(function(d) { return d.group; }))
             .padding(0.2);
     
         svg.append("g")
-            .attr("transform", "translate(0," + (height - 60) + ")")
+            .attr("transform", "translate(0," + height + ")")
             .call(d3.axisBottom(x));
     
+        // Y axis (set to a fixed range from 0 to 100)
         var y = d3.scaleLinear()
-            .domain([0, d3.max(formattedData, d => d.value)])
-            .range([height - 60, 0]);
+            .domain([0, 100]) // Fixed range from 0 to 100
+            .range([height, 0]);
     
         svg.append("g")
             .call(d3.axisLeft(y));
     
+        // Bars
         svg.selectAll("mybar")
             .data(formattedData)
             .enter()
             .append("rect")
-                .attr("x", d => x(d.group))
-                .attr("y", d => y(0))
-                .attr("width", x.bandwidth())
-                .attr("height", 0)
-                .attr("fill", d => colorScale[d.group])
-                .transition()
-                .duration(800)
-                .attr("y", d => y(d.value))
-                .attr("height", d => (height - 60) - y(d.value))
-                .delay((d, i) => i * 100);
+            .attr("x", d => x(d.group))
+            .attr("y", d => y(0))
+            .attr("width", x.bandwidth())
+            .attr("height", 0)
+            .attr("fill", d => colorScale[d.group])
+            .transition()
+            .duration(800)
+            .attr("y", d => y(d.value))
+            .attr("height", d => height - y(d.value))
+            .delay((d, i) => i * 100);
     
+        // Add labels to bars
         svg.selectAll(".text")
             .data(formattedData)
             .enter()
             .append("text")
-                .attr("class", "label")
-                .attr("x", d => x(d.group) + x.bandwidth() / 2)
-                .attr("y", d => y(d.value) - 5)
-                .attr("dy", ".75em")
-                .text(d => d.value)
-                .attr("fill", "#333")
-                .style("font-size", "12px")
-                .style("text-anchor", "middle");
+            .attr("class", "label")
+            .attr("x", d => x(d.group) + x.bandwidth() / 2)
+            .attr("y", d => y(d.value) - 5)
+            .attr("dy", ".75em")
+            .text(d => d.value)
+            .attr("fill", "#333")
+            .style("font-size", "12px")
+            .style("text-anchor", "middle");
     
-        svg.append("text")
-            .attr("x", (width - 100) / 2)
-            .attr("y", -10)
-            .attr("text-anchor", "middle")
-            .style("font-size", "16px")
-            .style("font-weight", "bold")
-            .style("fill", "#007bff")
-            .text(demographicLabel);
-    }
+        // Add demographic label to the regular labels in the label container
+        container.append("div")
+            .attr("class", "label-container")
+            .html(`
+                <strong>Demographic:</strong> ${demographicLabel}<br>
+                <strong>Year:</strong> ${selectedYear}<br>
+                <strong>Town:</strong> ${selectedTown}<br>
+                <strong>Data Type:</strong> ${dataType === 'qol' ? 'Quality of Life' : 'Other'}<br>
+                ${dataType === 'qol' ? `<strong>QOL Data Type:</strong> ${qolLabel}<br>` : ''}
+            `);
+        
+        container.append("button")
+            .attr("class", "download-button")
+            .attr("title", "Download chart")
+            .html('<svg class="download-icon" viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>')
+            .on("click", function() {
+                downloadChartAsImage(containerId, demographicLabel, selectedYear, selectedTown);
+            });
+    }   
 
+    function downloadChartAsImage(containerId, demographicLabel, selectedYear, selectedTown) {
+        var container = document.getElementById(containerId);
+        
+        html2canvas(container).then(function(canvas) {
+            // Create a temporary anchor element
+            var link = document.createElement('a');
+            link.download = `Chart_${demographicLabel}_${selectedYear}_${selectedTown}.png`.replace(/\s+/g, '_');
+            link.href = canvas.toDataURL("image/png");
+            link.click();
+        });
+    }
+           
     // Function to get human-readable label for specific demographics
     function getHumanReadableLabel(specificDemographic) {
         var labels = {
@@ -530,3 +635,6 @@ $(document).ready(function() {
         return labels[specificDemographic] || specificDemographic;
     }
 });
+
+//so as you know from my code, it creates different graphs based on your dropdown selections. These charts are being generated using the library D3js. 
+//Is it possible to make like a small copy button that basically copies the generated graph image with the labels?

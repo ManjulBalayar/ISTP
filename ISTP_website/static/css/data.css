@@ -168,11 +168,50 @@ form#selection-form button:active {
     }
 }
 
+.download-button {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 5px;
+    z-index: 10;
+}
+
+.download-icon {
+    width: 20px;
+    height: 20px;
+    fill: #3498db;
+}
+
+.download-button:hover .download-icon {
+    fill: #2980b9;
+}
+
 .chart-label {
     font-size: 18px;
     font-weight: 500;
     margin-bottom: 15px;
     color: #2c3e50;
+}
+
+.label-container {
+    position: absolute;
+    top: 10px; /* Adjust as needed */
+    right: 10px; /* Adjust as needed */
+    background-color: rgba(255, 255, 255, 0.9); 
+    padding: 10px;
+    border-radius: 6px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    font-size: 13px;
+    color: #333;
+    text-align: left;
+    z-index: 1000;
+}
+
+.label-container strong {
+    color: #007bff;
 }
 
 .legend-box {
@@ -221,21 +260,22 @@ form#selection-form button:active {
     display: none;
 }
 
-footer {
-    text-align: center;
-    padding: 20px 0;
-    background: #8C1D40;
-    color: #fff;
-    font-size: 0.9em;
+.error-message {
+    background-color: #ffebee;
+    border: 1px solid #ef9a9a;
+    border-radius: 4px;
+    padding: 10px;
+    margin-bottom: 20px;
+    color: #c62828;
 }
 
-footer a {
-    color: #FFC72C;
-    text-decoration: none;
+.error-message ul {
+    margin: 0;
+    padding-left: 20px;
 }
 
-footer a:hover {
-    text-decoration: underline;
+.error-message li {
+    margin-bottom: 5px;
 }
 
 text {

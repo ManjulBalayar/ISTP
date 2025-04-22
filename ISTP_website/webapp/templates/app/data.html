@@ -73,7 +73,7 @@
         </select>
 
         <div class="button-container">
-            <button type="submit">Visualize</button>
+            <button type="submit">Get Data</button>
             <button type="button" id="reset-form">Reset Options</button>
         </div>
     </form>
@@ -81,10 +81,13 @@
     <div id="qol-results">
         <!-- Queried data will be displayed here -->
     </div>
+    
     <div id="visualization">
         <div id="barChartContainer"></div>
     </div>
     
+    <!-- Script for html2canvas library -->
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 </body>
 
 <!-- <footer>
@@ -97,4 +100,5 @@
     <br>
     Ames, Iowa 50011-1054
 </footer> -->
+
 {% endblock %}
