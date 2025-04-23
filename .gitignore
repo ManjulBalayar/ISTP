@@ -5,3 +5,9 @@ __pycache__/
 db.sqlite3
 virt/
 .DS_Store
+
+# Ignore Jupyter/Node dependencies with vulnerabilities
+yarn.lock
+**/yarn.lock
+**/node_modules/
+**/jupyterlab/staging/
