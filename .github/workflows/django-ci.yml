@@ -34,7 +34,7 @@ jobs:
       run: |
         chmod +x ci_setup.sh
         ./ci_setup.sh
-    - name: Run Database Migrations
+    - name: Setup Database for Testing
       env:
         DB_NAME: test_db
         DB_USER: root
@@ -45,8 +45,13 @@ jobs:
         DJANGO_DEBUG: True
       run: |
         cd ISTP_website
-        python manage.py migrate
-    - name: Run Tests
+        # Create database schema
+        python manage.py migrate --noinput
+        # Create test database explicitly
+        mysql -h 127.0.0.1 -P 3306 -u root -proot -e "CREATE DATABASE IF NOT EXISTS test_test_db;"
+        # Apply migrations to test database
+        python manage.py migrate --database=default --noinput
+    - name: Run Tests with Debug Info
       env:
         DB_NAME: test_db
         DB_USER: root
@@ -57,7 +62,10 @@ jobs:
         DJANGO_DEBUG: True
       run: |
         cd ISTP_website
-        python manage.py test webapp
+        # Show database information
+        mysql -h 127.0.0.1 -P 3306 -u root -proot -e "SHOW DATABASES;"
+        # Run tests with verbose output
+        python manage.py test webapp -v 2
 
   security:
     runs-on: ubuntu-latest
