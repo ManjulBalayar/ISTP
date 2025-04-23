@@ -1,0 +1,58 @@
+name: Django CI/CD
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: test_db
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.9
+    - name: Install Dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pytest pytest-django
+    - name: Run Tests
+      env:
+        DB_NAME: test_db
+        DB_USER: root
+        DB_PASSWORD: root
+        DB_HOST: 127.0.0.1
+        DB_PORT: 3306
+        DJANGO_SECRET_KEY: test-ci-secret-key
+        DJANGO_DEBUG: True
+      run: |
+        cd ISTP_website
+        python manage.py test webapp
+
+  deploy:
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Deploy to PythonAnywhere
+        # This is a placeholder for your actual deployment script
+        # You'll need to customize this for your PythonAnywhere setup
+        run: |
+          echo "Add your PythonAnywhere deployment commands here"
+          # Example: Using PythonAnywhere API or SSH to deploy
+          # Could use rsync, git pull, or API calls depending on your setup 

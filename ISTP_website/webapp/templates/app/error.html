@@ -1,0 +1,12 @@
+{% extends "app/base.html" %}
+
+{% block content %}
+<div class="container error-container">
+    <div class="alert alert-danger mt-5">
+        <h4>Error</h4>
+        <p>{{ error_message }}</p>
+        <p>Please try again or contact the administrator if the problem persists.</p>
+        <a href="{% url 'home' %}" class="btn btn-primary">Return to Home</a>
+    </div>
+</div>
+{% endblock %} 

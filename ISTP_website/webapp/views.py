@@ -5,25 +5,34 @@ from django.http import JsonResponse
 import logging
 from django.db.models import Q
 
+# Setup proper structured logging
+logger = logging.getLogger('webapp')
 
 def home(request):
+    logger.info(f"Home page accessed by {request.META.get('REMOTE_ADDR')}")
     return render(request, 'app/home.html')
 
 def index(request):
-    towns = Qol.objects.values_list('name', flat=True).distinct()
-    demographics = ['ALL', 'AGE', 'SEX', 'TENURE', 'INCOME']
-    qol_data_types = [
-        'Jobs', 'Medical', 'Public School', 'Housing', 'Childcare',
-        'Seniorcare', 'Youth Programs', 'Community Services Overall',
-        'Recreation and Entertainment', 'Police', 'Fire',
-        'Condition of Streets', 'Condition of Parks', 'Garbage Collection',
-        'Water', 'Government Services Overall'
-    ]
-    return render(request, 'app/data.html', {
-        'towns': towns,
-        'demographics': demographics,
-        'qol_data_types': qol_data_types
-    })
+    logger.info(f"Data page accessed by {request.META.get('REMOTE_ADDR')}")
+    try:
+        towns = Qol.objects.values_list('name', flat=True).distinct()
+        demographics = ['ALL', 'AGE', 'SEX', 'TENURE', 'INCOME']
+        qol_data_types = [
+            'Jobs', 'Medical', 'Public School', 'Housing', 'Childcare',
+            'Seniorcare', 'Youth Programs', 'Community Services Overall',
+            'Recreation and Entertainment', 'Police', 'Fire',
+            'Condition of Streets', 'Condition of Parks', 'Garbage Collection',
+            'Water', 'Government Services Overall'
+        ]
+        logger.debug(f"Retrieved {len(towns)} towns for data page")
+        return render(request, 'app/data.html', {
+            'towns': towns,
+            'demographics': demographics,
+            'qol_data_types': qol_data_types
+        })
+    except Exception as e:
+        logger.error(f"Error in index view: {str(e)}", exc_info=True)
+        return render(request, 'app/error.html', {'error_message': 'An error occurred. Please try again later.'})
 
 
 def get_specific_demographic_options(request):
@@ -67,12 +76,16 @@ def get_specific_demographic_options(request):
 def get_qol_data_options(request):
     town = request.GET.get('town', None)
     specific_demographic = request.GET.get('specific_demographic', None)
+    
+    logger.info(f"QOL data requested for town: {town}, demographic: {specific_demographic}")
 
-    qol_data = Qol.objects.filter(name=town, cat=specific_demographic).first()
-    print("Town:", town)  # Debug print
-    print("Specific Demographic:", specific_demographic)
+    try:
+        qol_data = Qol.objects.filter(name=town, cat=specific_demographic).first()
+        
+        if not qol_data:
+            logger.warning(f"No QOL data found for town: {town}, demographic: {specific_demographic}")
+            return JsonResponse({'error': 'No data found for the selected options.'})
 
-    if qol_data:
         qol_ratings = {
             'jobs_vg': qol_data.qoljobs_vg,
             'jobs_g': qol_data.qoljobs_g,
@@ -184,18 +197,23 @@ def get_qol_data_options(request):
             'govtsrvall_na': qol_data.qolgovtsrvall_na,
         }
 
+        logger.debug(f"Successfully retrieved QOL data for {town}, {specific_demographic}")
         return JsonResponse({'qol_ratings': qol_ratings})
-    else:
-        # If qol_data is None, return an empty dictionary or an error message
-        return JsonResponse({'error': 'No data found for the selected options.'})
-
-# Setup basic logging
-logger = logging.getLogger(__name__)
+    except Exception as e:
+        logger.error(f"Error retrieving QOL data for {town}, {specific_demographic}: {str(e)}", exc_info=True)
+        return JsonResponse({'error': f'Error retrieving data: {str(e)}'})
 
 def search_towns(request):
-    term = request.GET.get('term', '')  # Get the user input from the 'term' GET parameter
-    towns = Qol.objects.filter(name__icontains=term).values_list('name', flat=True).distinct()
-    return JsonResponse(list(towns), safe=False)
+    term = request.GET.get('term', '')
+    logger.info(f"Town search for term: '{term}'")
+    
+    try:
+        towns = Qol.objects.filter(name__icontains=term).values_list('name', flat=True).distinct()
+        logger.debug(f"Town search found {len(towns)} matches for '{term}'")
+        return JsonResponse(list(towns), safe=False)
+    except Exception as e:
+        logger.error(f"Error in town search for '{term}': {str(e)}", exc_info=True)
+        return JsonResponse({'error': 'Error performing search'}, status=500)
 
 def query_data(request):
     try:
