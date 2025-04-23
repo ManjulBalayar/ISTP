@@ -162,6 +162,21 @@ CSRF_TRUSTED_ORIGINS = [f"https://{host}" for host in ALLOWED_HOSTS if not host.
 DATA_UPLOAD_MAX_MEMORY_SIZE = 2621440  # 2.5 MB
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 100
 
+# Disable potentially vulnerable modules in production
+if not DEBUG:
+    NOTEBOOK_ARGUMENTS = [
+        '--no-browser',
+        '--ip=127.0.0.1',
+        '--NotebookApp.token=',
+        '--NotebookApp.password=',
+        '--NotebookApp.disable_check_xsrf=False',
+    ]
+    
+    # Disable Jupyter in production
+    for app in list(INSTALLED_APPS):
+        if app.startswith('jupyter') or app.startswith('notebook'):
+            INSTALLED_APPS.remove(app)
+
 # Additional security settings for production
 if not DEBUG:
     SECURE_SSL_REDIRECT = True

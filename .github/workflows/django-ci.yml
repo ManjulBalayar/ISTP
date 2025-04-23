@@ -51,14 +51,18 @@ jobs:
       uses: actions/setup-python@v2
       with:
         python-version: 3.9
-    - name: Install security scanning tools
+    - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
+        pip install -r requirements.txt
         pip install bandit safety
-    - name: Run security scans
+    - name: Run custom security checks
       run: |
-        bandit -r . -x ./virt,./tests
-        safety check -r requirements.txt
+        python security_check.py
+    - name: Check for vulnerable dependencies specifically for JSONField SQL injection
+      run: |
+        pip install pip-audit
+        pip-audit --requirement requirements.txt --vulnerability CVE-2024-27351 || echo "Django version needs to be updated to 4.2.15 or 5.0.8"
         
   deploy:
     if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')

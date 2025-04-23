@@ -6,6 +6,7 @@ import logging
 from django.db.models import Q
 from ratelimit.decorators import ratelimit
 from django.core.exceptions import PermissionDenied
+from .utils import safe_values, safe_values_list
 
 # Setup proper structured logging
 logger = logging.getLogger('webapp')
@@ -24,7 +25,8 @@ def home(request):
 def index(request):
     logger.info(f"Data page accessed by {request.META.get('REMOTE_ADDR')}")
     try:
-        towns = Qol.objects.values_list('name', flat=True).distinct()
+        # Using safe_values_list instead of values_list to prevent SQL injection
+        towns = safe_values_list(Qol.objects.all(), 'name', flat=True).distinct()
         demographics = ['ALL', 'AGE', 'SEX', 'TENURE', 'INCOME']
         qol_data_types = [
             'Jobs', 'Medical', 'Public School', 'Housing', 'Childcare',
@@ -239,8 +241,8 @@ def search_towns(request):
         return JsonResponse({'error': 'Search term too long'}, status=400)
     
     try:
-        # Use the ORM properly to prevent SQL injection
-        towns = Qol.objects.filter(name__icontains=term).values_list('name', flat=True).distinct()
+        # Use safe_values_list instead of values_list
+        towns = safe_values_list(Qol.objects.filter(name__icontains=term), 'name', flat=True).distinct()
         logger.debug(f"Town search found {len(towns)} matches for '{term}'")
         return JsonResponse(list(towns), safe=False)
     except Exception as e:
@@ -278,12 +280,14 @@ def query_data(request):
         results = {}
         if year == 'All':
             for yr, model in model_mapping.items():
-                qol_data = model.objects.filter(name=town, cat=specific_demographic).values().first()
+                # Use safe_values instead of values
+                qol_data = safe_values(model.objects.filter(name=town, cat=specific_demographic)).first()
                 if qol_data:
                     results[yr] = {key: qol_data[key] for key in qol_data if key.startswith(f'qol{qol_data_type.lower()}')}
         else:
             model = model_mapping.get(year)
-            qol_data = model.objects.filter(name=town, cat=specific_demographic).values().first()
+            # Use safe_values instead of values
+            qol_data = safe_values(model.objects.filter(name=town, cat=specific_demographic)).first()
             if qol_data:
                 results[year] = {key: qol_data[key] for key in qol_data if key.startswith(f'qol{qol_data_type.lower()}')}
 
