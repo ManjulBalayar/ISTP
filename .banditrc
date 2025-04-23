@@ -1,0 +1,7 @@
+# Bandit configuration file
+
+# Skip these tests
+skips: B101,B104,B105,B110,B310,B311
+
+# Directories to be excluded
+exclude_dirs: /virt/,/JupyterStuff/,/tests/ 

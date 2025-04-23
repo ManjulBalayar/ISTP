@@ -30,6 +30,10 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
         pip install pytest pytest-django
+    - name: Setup Environment
+      run: |
+        chmod +x ci_setup.sh
+        ./ci_setup.sh
     - name: Run Tests
       env:
         DB_NAME: test_db
@@ -55,10 +59,11 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
-        pip install bandit safety
-    - name: Run custom security checks
+        pip install bandit safety packaging
+    - name: Setup Environment
       run: |
-        python security_check.py
+        chmod +x ci_setup.sh
+        ./ci_setup.sh
     - name: Check for vulnerable dependencies specifically for JSONField SQL injection
       run: |
         pip install pip-audit

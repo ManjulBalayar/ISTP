@@ -16,9 +16,9 @@ from email.mime.multipart import MIMEMultipart
 def run_safety_check():
     print("Running Safety check on dependencies...")
     try:
-        # Run safety check and get JSON output
+        # Run safety scan (updated from check) and get JSON output
         result = subprocess.run(
-            ['safety', 'check', '--json', '-r', 'requirements.txt'], 
+            ['safety', 'scan', '--json', '-r', 'requirements.txt'], 
             capture_output=True, 
             text=True
         )
@@ -71,9 +71,9 @@ def run_safety_check():
 def check_code_security():
     print("Running Bandit for code security analysis...")
     try:
-        # Run bandit on project directory, excluding virtualenv
+        # Run bandit on project directory with config file
         result = subprocess.run(
-            ['bandit', '-r', '.', '-x', './virt,./JupyterStuff', '-f', 'json'], 
+            ['bandit', '-r', '.', '-c', '.banditrc', '-f', 'json'], 
             capture_output=True, 
             text=True
         )
