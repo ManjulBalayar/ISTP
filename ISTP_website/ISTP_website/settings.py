@@ -149,6 +149,19 @@ STATICFILES_DIRS = [
 # Static root for production (used by collectstatic)
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
+# Security settings
+SECURE_CONTENT_TYPE_NOSNIFF = True
+SECURE_BROWSER_XSS_FILTER = True
+X_FRAME_OPTIONS = 'DENY'
+
+# Protection against path traversal attacks
+DISALLOWED_USER_AGENTS = []
+CSRF_TRUSTED_ORIGINS = [f"https://{host}" for host in ALLOWED_HOSTS if not host.startswith('127.0.0.1') and not host == 'localhost']
+
+# Protection against DoS attacks
+DATA_UPLOAD_MAX_MEMORY_SIZE = 2621440  # 2.5 MB
+DATA_UPLOAD_MAX_NUMBER_FIELDS = 100
+
 # Additional security settings for production
 if not DEBUG:
     SECURE_SSL_REDIRECT = True
@@ -158,16 +171,15 @@ if not DEBUG:
     # Only set these if you're using HTTPS
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
+    
+    # Rate limiting settings
+    RATELIMIT_VIEW = 'webapp.views.ratelimited_error'
+    RATELIMIT_ENABLE = True
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-# Security settings
-SECURE_CONTENT_TYPE_NOSNIFF = True
-SECURE_BROWSER_XSS_FILTER = True
-X_FRAME_OPTIONS = 'DENY'
 
 # Logging Configuration
 LOGGING = {

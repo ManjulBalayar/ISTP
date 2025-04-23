@@ -1,17 +1,26 @@
 from django.shortcuts import render
 from .models import Qol, Qol1994, Qol2004
 import pandas as pd
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 import logging
 from django.db.models import Q
+from ratelimit.decorators import ratelimit
+from django.core.exceptions import PermissionDenied
 
 # Setup proper structured logging
 logger = logging.getLogger('webapp')
 
+def ratelimited_error(request, exception):
+    """Handle rate limit exceptions"""
+    logger.warning(f"Rate limit exceeded for {request.META.get('REMOTE_ADDR')}")
+    return HttpResponse("Too many requests, please try again later.", status=429)
+
+@ratelimit(key='ip', rate='10/m')
 def home(request):
     logger.info(f"Home page accessed by {request.META.get('REMOTE_ADDR')}")
     return render(request, 'app/home.html')
 
+@ratelimit(key='ip', rate='20/m')
 def index(request):
     logger.info(f"Data page accessed by {request.META.get('REMOTE_ADDR')}")
     try:
@@ -35,6 +44,7 @@ def index(request):
         return render(request, 'app/error.html', {'error_message': 'An error occurred. Please try again later.'})
 
 
+@ratelimit(key='ip', rate='30/m')
 def get_specific_demographic_options(request):
     main_demographic = request.GET.get('demographic', None)
 
@@ -73,13 +83,28 @@ def get_specific_demographic_options(request):
     return JsonResponse({'specific_options': specific_options})
 
 
+@ratelimit(key='ip', rate='30/m')
 def get_qol_data_options(request):
     town = request.GET.get('town', None)
     specific_demographic = request.GET.get('specific_demographic', None)
     
     logger.info(f"QOL data requested for town: {town}, demographic: {specific_demographic}")
 
+    # Validate input parameters
+    if not town or not specific_demographic:
+        logger.warning(f"Invalid parameters: town={town}, demographic={specific_demographic}")
+        return JsonResponse({'error': 'Missing required parameters'}, status=400)
+    
+    # Prevent potential injection by validating against allowed values
+    allowed_demographics = ['ALL', 'AGE1', 'AGE2', 'AGE3', 'SEX1M', 'SEX1F', 
+                           'TENURE1', 'TENURE2', 'TENURE3', 'INC1', 'INC2', 'INC3', 'INC4']
+    
+    if specific_demographic not in allowed_demographics:
+        logger.warning(f"Invalid demographic parameter: {specific_demographic}")
+        return JsonResponse({'error': 'Invalid demographic parameter'}, status=400)
+
     try:
+        # Use the ORM properly to prevent SQL injection
         qol_data = Qol.objects.filter(name=town, cat=specific_demographic).first()
         
         if not qol_data:
@@ -203,11 +228,18 @@ def get_qol_data_options(request):
         logger.error(f"Error retrieving QOL data for {town}, {specific_demographic}: {str(e)}", exc_info=True)
         return JsonResponse({'error': f'Error retrieving data: {str(e)}'})
 
+@ratelimit(key='ip', rate='30/m')
 def search_towns(request):
     term = request.GET.get('term', '')
     logger.info(f"Town search for term: '{term}'")
     
+    # Validate search term
+    if len(term) > 100:  # Prevent excessively long search terms
+        logger.warning(f"Excessively long search term ({len(term)} chars) from {request.META.get('REMOTE_ADDR')}")
+        return JsonResponse({'error': 'Search term too long'}, status=400)
+    
     try:
+        # Use the ORM properly to prevent SQL injection
         towns = Qol.objects.filter(name__icontains=term).values_list('name', flat=True).distinct()
         logger.debug(f"Town search found {len(towns)} matches for '{term}'")
         return JsonResponse(list(towns), safe=False)
@@ -215,6 +247,7 @@ def search_towns(request):
         logger.error(f"Error in town search for '{term}': {str(e)}", exc_info=True)
         return JsonResponse({'error': 'Error performing search'}, status=500)
 
+@ratelimit(key='ip', rate='20/m')
 def query_data(request):
     try:
         town = request.GET.get('town')
@@ -223,6 +256,17 @@ def query_data(request):
         year = request.GET.get('year', '2014')  # Default to 2014
 
         logger.info(f"Year: {year}, Town: {town}, Demographic: {specific_demographic}, QOL Data Type: {qol_data_type}")
+        
+        # Validate input parameters
+        if not town or not specific_demographic or not qol_data_type:
+            logger.warning(f"Missing parameters in query_data: town={town}, demographic={specific_demographic}, qol_type={qol_data_type}")
+            return JsonResponse({'error': 'Missing required parameters'}, status=400)
+            
+        # Validate year
+        allowed_years = ['1994', '2004', '2014', 'All']
+        if year not in allowed_years:
+            logger.warning(f"Invalid year parameter: {year}")
+            return JsonResponse({'error': 'Invalid year parameter'}, status=400)
 
         # Map years to their respective models
         model_mapping = {
@@ -243,7 +287,7 @@ def query_data(request):
             if qol_data:
                 results[year] = {key: qol_data[key] for key in qol_data if key.startswith(f'qol{qol_data_type.lower()}')}
 
-        QolModel = model_mapping.get(year, Qol2004)  # Use Qol as default if year is not recognized
+        QolModel = model_mapping.get(year, Qol)  # Use Qol as default if year is not recognized
 
         demographic_mapping = {
             'All respondents': 'ALL',
