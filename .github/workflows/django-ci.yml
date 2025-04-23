@@ -72,7 +72,7 @@ jobs:
       - uses: actions/checkout@v2
       - name: Deploy to PythonAnywhere
         # This is a placeholder for your actual deployment script
-        # You'll need to customize this for your PythonAnywhere setup
+        # I'll need to customize this for your PythonAnywhere setup
         run: |
           echo "Add your PythonAnywhere deployment commands here"
           # Example: Using PythonAnywhere API or SSH to deploy 

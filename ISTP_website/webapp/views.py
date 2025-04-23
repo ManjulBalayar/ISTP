@@ -4,7 +4,7 @@ import pandas as pd
 from django.http import JsonResponse, HttpResponse
 import logging
 from django.db.models import Q
-from ratelimit.decorators import ratelimit
+from django_ratelimit.decorators import ratelimit
 from django.core.exceptions import PermissionDenied
 from .utils import safe_values, safe_values_list
 

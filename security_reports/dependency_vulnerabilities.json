@@ -1,0 +1,112 @@
+[
+  {
+    "name": "django",
+    "installed_version": "4.2.15",
+    "vulnerabilities": [
+      {
+        "id": "PYSEC-2025-13",
+        "fix_versions": [
+          "4.2.20",
+          "5.0.13",
+          "5.1.7"
+        ],
+        "aliases": [
+          "CVE-2025-26699"
+        ],
+        "description": "An issue was discovered in Django 5.1 before 5.1.7, 5.0 before 5.0.13, and 4.2 before 4.2.20. The django.utils.text.wrap() method and wordwrap template filter are subject to a potential denial-of-service attack when used with very long strings."
+      },
+      {
+        "id": "PYSEC-2024-102",
+        "fix_versions": [
+          "4.2.16",
+          "5.0.9",
+          "5.1.1"
+        ],
+        "aliases": [
+          "CVE-2024-45230"
+        ],
+        "description": "An issue was discovered in Django 5.1 before 5.1.1, 5.0 before 5.0.9, and 4.2 before 4.2.16. The urlize() and urlizetrunc() template filters are subject to a potential denial-of-service attack via very large inputs with a specific sequence of characters."
+      },
+      {
+        "id": "PYSEC-2024-157",
+        "fix_versions": [
+          "4.2.17",
+          "5.0.10",
+          "5.1.4"
+        ],
+        "aliases": [
+          "CVE-2024-53908"
+        ],
+        "description": "An issue was discovered in Django 5.1 before 5.1.4, 5.0 before 5.0.10, and 4.2 before 4.2.17. Direct usage of the django.db.models.fields.json.HasKey lookup, when an Oracle database is used, is subject to SQL injection if untrusted data is used as an lhs value. (Applications that use the jsonfield.has_key lookup via __ are unaffected.)"
+      },
+      {
+        "id": "PYSEC-2024-156",
+        "fix_versions": [
+          "4.2.17",
+          "5.0.10",
+          "5.1.4"
+        ],
+        "aliases": [
+          "CVE-2024-53907"
+        ],
+        "description": "An issue was discovered in Django 5.1 before 5.1.4, 5.0 before 5.0.10, and 4.2 before 4.2.17. The strip_tags() method and striptags template filter are subject to a potential denial-of-service attack via certain inputs containing large sequences of nested incomplete HTML entities."
+      },
+      {
+        "id": "PYSEC-2025-1",
+        "fix_versions": [
+          "4.2.18",
+          "5.0.11",
+          "5.1.5"
+        ],
+        "aliases": [
+          "CVE-2024-56374"
+        ],
+        "description": "An issue was discovered in Django 5.1 before 5.1.5, 5.0 before 5.0.11, and 4.2 before 4.2.18. Lack of upper-bound limit enforcement in strings passed when performing IPv6 validation could lead to a potential denial-of-service attack. The undocumented and private functions clean_ipv6_address and is_valid_ipv6_address are vulnerable, as is the django.forms.GenericIPAddressField form field. (The django.db.models.GenericIPAddressField model field is not affected.)"
+      },
+      {
+        "id": "GHSA-rrqc-c2jx-6jgv",
+        "fix_versions": [
+          "4.2.16",
+          "5.0.9",
+          "5.1.1"
+        ],
+        "aliases": [
+          "CVE-2024-45231"
+        ],
+        "description": "An issue was discovered in Django v5.1.1, v5.0.9, and v4.2.16. The django.contrib.auth.forms.PasswordResetForm class, when used in a view implementing password reset flows, allows remote attackers to enumerate user e-mail addresses by sending password reset requests and observing the outcome (only when e-mail sending is consistently failing)."
+      }
+    ]
+  },
+  {
+    "name": "sqlparse",
+    "installed_version": "0.4.4",
+    "vulnerabilities": [
+      {
+        "id": "GHSA-2m57-hf25-phgg",
+        "fix_versions": [
+          "0.5.0"
+        ],
+        "aliases": [
+          "CVE-2024-4340"
+        ],
+        "description": "### Summary Passing a heavily nested list to sqlparse.parse() leads to a Denial of Service due to RecursionError.  ### Details + PoC Running the following code will raise Maximum recursion limit exceeded exception: ```py import sqlparse sqlparse.parse('[' * 10000 + ']' * 10000) ``` We expect a traceback of RecursionError: ```py Traceback (most recent call last):   File \"trigger_sqlparse_nested_list.py\", line 3, in <module>     sqlparse.parse('[' * 10000 + ']' * 10000)   File \"/home/uriya/.local/lib/python3.10/site-packages/sqlparse/__init__.py\", line 30, in parse     return tuple(parsestream(sql, encoding))   File \"/home/uriya/.local/lib/python3.10/site-packages/sqlparse/engine/filter_stack.py\", line 36, in run     stmt = grouping.group(stmt)   File \"/home/uriya/.local/lib/python3.10/site-packages/sqlparse/engine/grouping.py\", line 428, in group     func(stmt)   File \"/home/uriya/.local/lib/python3.10/site-packages/sqlparse/engine/grouping.py\", line 53, in group_brackets     _group_matching(tlist, sql.SquareBrackets)   File \"/home/uriya/.local/lib/python3.10/site-packages/sqlparse/engine/grouping.py\", line 48, in _group_matching     tlist.group_tokens(cls, open_idx, close_idx)   File \"/home/uriya/.local/lib/python3.10/site-packages/sqlparse/sql.py\", line 328, in group_tokens     grp = grp_cls(subtokens)   File \"/home/uriya/.local/lib/python3.10/site-packages/sqlparse/sql.py\", line 161, in __init__     super().__init__(None, str(self))   File \"/home/uriya/.local/lib/python3.10/site-packages/sqlparse/sql.py\", line 165, in __str__     return ''.join(token.value for token in self.flatten())   File \"/home/uriya/.local/lib/python3.10/site-packages/sqlparse/sql.py\", line 165, in <genexpr>     return ''.join(token.value for token in self.flatten())   File \"/home/uriya/.local/lib/python3.10/site-packages/sqlparse/sql.py\", line 214, in flatten     yield from token.flatten()   File \"/home/uriya/.local/lib/python3.10/site-packages/sqlparse/sql.py\", line 214, in flatten     yield from token.flatten()   File \"/home/uriya/.local/lib/python3.10/site-packages/sqlparse/sql.py\", line 214, in flatten     yield from token.flatten()   [Previous line repeated 983 more times] RecursionError: maximum recursion depth exceeded ```  ### Fix suggestion The [flatten()](https://github.com/andialbrecht/sqlparse/blob/master/sqlparse/sql.py#L207) function of TokenList class should limit the recursion to a maximal depth: ```py from sqlparse.exceptions import SQLParseError  MAX_DEPTH = 100      def flatten(self, depth=1):         \"\"\"Generator yielding ungrouped tokens.          This method is recursively called for all child tokens.         \"\"\"     if depth >= MAX_DEPTH:         raise SQLParseError('Maximal depth reached')         for token in self.tokens:             if token.is_group:                 yield from token.flatten(depth + 1)             else:                 yield token ```  ### Impact Denial of Service (the impact depends on the use). Anyone parsing a user input with sqlparse.parse() is affected. "
+      }
+    ]
+  },
+  {
+    "name": "requests",
+    "installed_version": "2.31.0",
+    "vulnerabilities": [
+      {
+        "id": "GHSA-9wx4-h78v-vm56",
+        "fix_versions": [
+          "2.32.0"
+        ],
+        "aliases": [
+          "CVE-2024-35195"
+        ],
+        "description": "When making requests through a Requests `Session`, if the first request is made with `verify=False` to disable cert verification, all subsequent requests to the same origin will continue to ignore cert verification regardless of changes to the value of `verify`. This behavior will continue for the lifecycle of the connection in the connection pool.  ### Remediation Any of these options can be used to remediate the current issue, we highly recommend upgrading as the preferred mitigation.  * Upgrade to `requests>=2.32.0`. * For `requests<2.32.0`, avoid setting `verify=False` for the first request to a host while using a Requests Session. * For `requests<2.32.0`, call `close()` on `Session` objects to clear existing connections if `verify=False` is used.  ### Related Links * https://github.com/psf/requests/pull/6655"
+      }
+    ]
+  }
+]

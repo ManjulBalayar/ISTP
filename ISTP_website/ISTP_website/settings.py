@@ -191,6 +191,10 @@ if not DEBUG:
     RATELIMIT_VIEW = 'webapp.views.ratelimited_error'
     RATELIMIT_ENABLE = True
 
+# Django-ratelimit settings
+RATELIMIT_USE_CACHE = 'default'  # Uses Django's default cache
+RATELIMIT_FAIL_OPEN = False  # Block requests if the rate limiter fails
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
