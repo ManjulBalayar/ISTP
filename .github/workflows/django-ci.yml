@@ -34,6 +34,18 @@ jobs:
       run: |
         chmod +x ci_setup.sh
         ./ci_setup.sh
+    - name: Run Database Migrations
+      env:
+        DB_NAME: test_db
+        DB_USER: root
+        DB_PASSWORD: root
+        DB_HOST: 127.0.0.1
+        DB_PORT: 3306
+        DJANGO_SECRET_KEY: test-ci-secret-key
+        DJANGO_DEBUG: True
+      run: |
+        cd ISTP_website
+        python manage.py migrate
     - name: Run Tests
       env:
         DB_NAME: test_db
