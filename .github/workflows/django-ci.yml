@@ -47,10 +47,10 @@ jobs:
         cd ISTP_website
         # Create database schema
         python manage.py migrate --noinput
-        # Create test database explicitly
-        mysql -h 127.0.0.1 -P 3306 -u root -proot -e "CREATE DATABASE IF NOT EXISTS test_test_db;"
-        # Apply migrations to test database
-        python manage.py migrate --database=default --noinput
+        # Create test database explicitly and apply migrations
+        mysql -h 127.0.0.1 -P 3306 -u root -proot -e "DROP DATABASE IF EXISTS test_test_db; CREATE DATABASE test_test_db;"
+        # Create tables in test database
+        DJANGO_DB_NAME=test_test_db python manage.py migrate --noinput
     - name: Run Tests with Debug Info
       env:
         DB_NAME: test_db
@@ -64,8 +64,8 @@ jobs:
         cd ISTP_website
         # Show database information
         mysql -h 127.0.0.1 -P 3306 -u root -proot -e "SHOW DATABASES;"
-        # Run tests with verbose output
-        python manage.py test webapp -v 2
+        # Run tests with keepdb flag to reuse the existing test database
+        python manage.py test webapp -v 2 --keepdb
 
   security:
     runs-on: ubuntu-latest
