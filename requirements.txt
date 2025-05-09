@@ -1,5 +1,5 @@
 # Core Django requirements
-Django==4.2.20
+Django==4.2.21
 mysqlclient==2.2.4
 PyMySQL==1.1.1
 python-dotenv==1.1.0
