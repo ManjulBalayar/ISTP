@@ -248,25 +248,159 @@ function renderPieChart(data, qolDataType) {
 }
 
 $(document).ready(function() {
+    // Hide all form elements except the first one (data type) initially
+    hideAllFormElementsExceptFirst();
+    
     // When 'Select Type of Data' changes
     $('#data_type').change(function() {
         var selectedType = $(this).val();
-        if (selectedType === 'qol') {
-            $('#qol_data_type_container').show();
-            $('#soc_data_type_container').hide();
-            populateQOLDataType();
-        } else if (selectedType === 'soc') {
-            $('#qol_data_type_container').hide();
-            $('#soc_data_type_container').show();
-            populateSocialCapitalDataType();
+        // Clear and hide all elements that come after this selection
+        clearFollowingSelections('data_type');
+        
+        if (selectedType) {
+            $('#year_container').show();
         } else {
-            $('#qol_data_type_container').hide();
-            $('#soc_data_type_container').hide();
-            $('#qol_data_type').empty().append('<option value=""> </option>');
-            $('#soc_data_type').empty().append('<option value=""> </option>');
+            // If data type is cleared, hide everything else
+            $('#year_container, #town_container, #qol_data_type_container, #soc_data_type_container, #demographic_container').hide();
+            // Clear all values
+            $('#year, #town, #qol_data_type, #soc_data_type, #demographic').val('');
+            $('#town-search').val('');
         }
     });
-
+    
+    // When 'Year' changes
+    $('#year').change(function() {
+        var selectedYear = $(this).val();
+        // Clear and hide all elements that come after this selection
+        clearFollowingSelections('year');
+        
+        if (selectedYear) {
+            $('#town_container').show();
+        } else {
+            // If year is cleared, hide everything after it
+            $('#town_container, #qol_data_type_container, #soc_data_type_container, #demographic_container').hide();
+            // Clear all values
+            $('#town, #qol_data_type, #soc_data_type, #demographic').val('');
+            $('#town-search').val('');
+        }
+    });
+    
+    // When 'Town' changes
+    $('#town').change(function() {
+        var selectedTown = $(this).val();
+        var selectedType = $('#data_type').val();
+        // Clear and hide all elements that come after this selection
+        clearFollowingSelections('town');
+        
+        if (selectedTown) {
+            if (selectedType === 'qol') {
+                $('#qol_data_type_container').show();
+                $('#soc_data_type_container').hide();
+                $('#soc_data_type').val('');
+                populateQOLDataType();
+            } else if (selectedType === 'soc') {
+                $('#soc_data_type_container').show();
+                $('#qol_data_type_container').hide();
+                $('#qol_data_type').val('');
+                populateSocialCapitalDataType();
+            }
+            $('#demographic_container').hide();
+            $('#demographic').val('');
+        } else {
+            // If town is cleared, hide everything after it
+            $('#qol_data_type_container, #soc_data_type_container, #demographic_container').hide();
+            // Clear all values
+            $('#qol_data_type, #soc_data_type, #demographic').val('');
+        }
+    });
+    
+    // When QOL data type changes
+    $('#qol_data_type').change(function() {
+        var selectedQOLType = $(this).val();
+        // Clear and hide all elements that come after this selection
+        clearFollowingSelections('qol_data_type');
+        
+        if (selectedQOLType) {
+            $('#demographic_container').show();
+        } else {
+            $('#demographic_container').hide();
+            $('#demographic').val('');
+        }
+    });
+    
+    // When Social Capital data type changes
+    $('#soc_data_type').change(function() {
+        var selectedSocialCapitalType = $(this).val();
+        // Clear and hide all elements that come after this selection
+        clearFollowingSelections('soc_data_type');
+        
+        if (selectedSocialCapitalType) {
+            $('#demographic_container').show();
+        } else {
+            $('#demographic_container').hide();
+            $('#demographic').val('');
+        }
+    });
+    
+    // Hide all form elements except the first one
+    function hideAllFormElementsExceptFirst() {
+        $('#year_container').hide();
+        $('#town_container').hide();
+        $('#qol_data_type_container').hide();
+        $('#soc_data_type_container').hide();
+        $('#demographic_container').hide();
+    }
+    
+    // Clear and hide all form elements that come after the specified element
+    function clearFollowingSelections(currentElement) {
+        var order = ['data_type', 'year', 'town', 'qol_data_type', 'soc_data_type', 'demographic'];
+        var currentIndex = order.indexOf(currentElement);
+        
+        // Clear and hide all elements after the current one
+        for (var i = currentIndex + 1; i < order.length; i++) {
+            var elementId = order[i];
+            
+            // Reset values
+            $('#' + elementId).val('');
+            
+            // Hide containers
+            if (elementId === 'qol_data_type') {
+                $('#qol_data_type_container').hide();
+            } else if (elementId === 'soc_data_type') {
+                $('#soc_data_type_container').hide();
+            } else if (elementId === 'town') {
+                $('#town_container').hide();
+                $('#town-search').val(''); // Clear town search input too
+            } else {
+                $('#' + elementId + '_container').hide();
+            }
+        }
+        
+        // If changing data type, we need special handling
+        if (currentElement === 'data_type') {
+            var selectedType = $('#data_type').val();
+            if (!selectedType) {
+                $('#year_container').hide();
+            }
+        }
+        
+        // Additional special cases based on what changed
+        if (currentElement === 'year') {
+            $('#town_container').show(); // After changing year, always show town next
+            $('#qol_data_type_container, #soc_data_type_container, #demographic_container').hide();
+        } else if (currentElement === 'town') {
+            var dataType = $('#data_type').val();
+            if (dataType === 'qol') {
+                $('#qol_data_type_container').show();
+                $('#soc_data_type_container').hide();
+            } else if (dataType === 'soc') {
+                $('#soc_data_type_container').show();
+                $('#qol_data_type_container').hide();
+            }
+            $('#demographic_container').hide();
+        }
+    }
+    
     // Populate QOL Data Type dropdown
     function populateQOLDataType() {
         var qolDataTypeSelect = $('#qol_data_type');
@@ -309,25 +443,53 @@ $(document).ready(function() {
         socDataTypeSelect.append('<option value="" selected></option>');
         
         var socOptions = {
-            'Friends in Town': 'Friends in Town',
-            'Relatives in Town': 'Relatives in Town',
-            'Supportiveness': 'Supportiveness',
-            'Organizations Working Together': 'Organizations Working Together',
-            'New Residents as Leaders': 'New Residents as Leaders',
-            'Open to Ideas': 'Open to Ideas',
-            'Local Organization Membership': 'Local Organization Membership',
-            'Outside Organization Membership': 'Outside Organization Membership',
-            'Activity Level in Organizations': 'Activity Level in Organizations',
-            'Local vs Outside Organizations': 'Local vs Outside Organizations',
-            'Volunteer Participation': 'Volunteer Participation',
-            'Town Support for Projects': 'Town Support for Projects',
-            'Involvement in Decisions': 'Involvement in Decisions',
-            'Sorry to Leave': 'Sorry to Leave',
-            'Feel at Home': 'Feel at Home',
-            'Town Like Friends': 'Town Like Friends',
-            'Go-for-it Attitude': 'Go-for-it Attitude',
-            'Well-kept Property': 'Well-kept Property',
-            'Looking Out for Self': 'Looking Out for Self'
+            // Community Connection
+            'Close friends in the community': 'Close friends in the community',
+            'Adult relatives and in-laws in the community': 'Adult relatives and in-laws in the community',
+            'Community is supportive instead of indifferent': 'Community is supportive instead of indifferent',
+            
+            // Community Leadership & Openness
+            'Local clubs and organizations interested in what is best for all residents': 'Local clubs and organizations interested in what is best for all residents',
+            'Community receptive to new residents taking leadership positions': 'Community receptive to new residents taking leadership positions',
+            'Community is open to new ideas instead of rejecting new ideas': 'Community is open to new ideas instead of rejecting new ideas',
+            
+            // Organization Involvement
+            'Belonging in local organizations': 'Belonging in local organizations',
+            'Belonging in non-local organizations': 'Belonging in non-local organizations',
+            'Involvement in local activities and events': 'Involvement in local activities and events',
+            'Involvement in local or outside organizations': 'Involvement in local or outside organizations',
+            
+            // Civic Engagement
+            'Volunteering in community projects last year': 'Volunteering in community projects last year',
+            'When something needs to get done, whole town gets behind it': 'When something needs to get done, whole town gets behind it',
+            'Everyone can contribute to local government affairs if they want to': 'Everyone can contribute to local government affairs if they want to',
+            
+            // Community Attachment
+            'I would feel sorry if I had to leave this community': 'I would feel sorry if I had to leave this community',
+            'I feel at home in this community': 'I feel at home in this community',
+            'Living in this town is like being with a close group of friends': 'Living in this town is like being with a close group of friends',
+            
+            // Community Satisfaction
+            'Town has a lot going for it compared to other towns of a similar size': 'Town has a lot going for it compared to other towns of a similar size',
+            'Community is well-kept instead of run-down': 'Community is well-kept instead of run-down',
+            'If you don\'t look out for yourself in this town, no one else will': 'If you don\'t look out for yourself in this town, no one else will',
+            
+            // Services Location
+            'Where do you go for primary health care': 'Where do you go for primary health care',
+            'Where do you go for specialized health care': 'Where do you go for specialized health care',
+            'Where do you go to shop for daily needs': 'Where do you go to shop for daily needs',
+            'Where do you go to shop for big ticket items': 'Where do you go to shop for big ticket items',
+            'Where do you go for entertainment and recreation': 'Where do you go for entertainment and recreation',
+            'Where do you go to attend church or worship services': 'Where do you go to attend church or worship services',
+            
+            // Reasons for Lack of Involvement
+            'Reasons not getting involved: do not have the time': 'Reasons not getting involved: do not have the time',
+            'Reasons not getting involved: do not have the needed skills': 'Reasons not getting involved: do not have the needed skills',
+            'Reasons not getting involved: do not know how to volunteer': 'Reasons not getting involved: do not know how to volunteer',
+            'Reasons not getting involved: tried to volunteer, but help not accepted': 'Reasons not getting involved: tried to volunteer, but help not accepted',
+            'Reasons not getting involved: I have no interest in volunteering': 'Reasons not getting involved: I have no interest in volunteering',
+            'Reasons not getting involved: no one asked me to volunteer': 'Reasons not getting involved: no one asked me to volunteer',
+            'Reasons not getting involved: there are no projects that need volunteers': 'Reasons not getting involved: there are no projects that need volunteers'
         };
 
         $.each(socOptions, function(key, label) {
@@ -341,6 +503,17 @@ $(document).ready(function() {
     // New autocomplete functionality for town selection
     var townInput = $('#town-search');
     var townSelect = $('#town');
+    
+    // Monitor the town-search input
+    townInput.on('input', function() {
+        var value = $(this).val();
+        if (!value) {
+            clearFollowingSelections('town');
+            $('#town').val('');
+        }
+    });
+    
+    // Town search autocomplete
     var townOptions = townSelect.find('option').map(function() {
         return { value: $(this).val(), text: $(this).text() };
     }).get();
@@ -357,6 +530,10 @@ $(document).ready(function() {
         select: function(event, ui) {
             townInput.val(ui.item.text);
             townSelect.val(ui.item.value);
+            
+            // Trigger change event to update the UI
+            townSelect.trigger('change');
+            
             return false;
         }
     }).focus(function() {
@@ -369,6 +546,11 @@ $(document).ready(function() {
             return option.text.toLowerCase() === value.toLowerCase();
         });
         townSelect.val(option ? option.value : '');
+        
+        // If input is cleared, hide subsequent elements
+        if (!value) {
+            clearFollowingSelections('town');
+        }
     });
 
     // Handle the 'Visualize' button press to generate the visualizations
@@ -388,16 +570,16 @@ $(document).ready(function() {
         // Validate form inputs
         var errors = [];
 
+        if (!dataType) {
+            errors.push("Please select a type of data.");
+        }
+
         if (!selectedYear) {
             errors.push("Please select a year.");
         }
 
         if (!selectedTown) {
             errors.push("Please select a town.");
-        }
-
-        if (!dataType) {
-            errors.push("Please select a type of data.");
         }
 
         if (dataType === 'qol' && !selectedQOLType) {
@@ -512,11 +694,10 @@ $(document).ready(function() {
     // Handle the reset button click
     $('#reset-form').on('click', function() {
         $('#selection-form select').val('');
-        $('#qol_data_type_container').hide();
-        $('#soc_data_type_container').hide();
-        $('#qol_data_type').empty().append('<option value=""> </option>');
-        $('#soc_data_type').empty().append('<option value=""> </option>');
         townInput.val('');  // Clear the town search input
+        hideAllFormElementsExceptFirst();
+        $('#visualization').empty().css('visibility', 'hidden');
+        $('.error-message').remove();
     });
 
     // Clear previous charts and prepare the visualization area
@@ -569,29 +750,6 @@ $(document).ready(function() {
             'govtsrvall': 'Government Services Overall'
         };
 
-        // Define a mapping for Social Capital prefixes to human-readable labels
-        var socPrefixMapping = {
-            'scfriends': 'Friends in Town',
-            'screlatives': 'Relatives in Town',
-            'scsupportive': 'Supportiveness',
-            'scorgsworkall': 'Organizations Working Together',
-            'scnewresleader': 'New Residents as Leaders',
-            'scopenideas': 'Open to Ideas',
-            'sclocalorg': 'Local Organization Membership',
-            'scoutsideorg': 'Outside Organization Membership',
-            'scactiveorg': 'Activity Level in Organizations',
-            'sclocoutorg': 'Local vs Outside Organizations',
-            'cevolunteer': 'Volunteer Participation',
-            'cetowngetsbehind': 'Town Support for Projects',
-            'ceinvolvdecisions': 'Involvement in Decisions',
-            'casorryleave': 'Sorry to Leave',
-            'cafeelhome': 'Feel at Home',
-            'catownlikefriends': 'Town Like Friends',
-            'csmoregoforit': 'Go-for-it Attitude',
-            'cswellkept': 'Well-kept Property',
-            'cslookoutforself': 'Looking Out for Self'
-        };
-    
         // Get the human-readable data type label
         var dataTypeLabel = '';
         if (dataType === 'qol') {
@@ -623,11 +781,17 @@ $(document).ready(function() {
                 'None': '#BCAAA4'
             };
         } else if (dataType === 'soc') {
-            // Define appropriate labels and colors for Social Capital data
-            // This will depend on the specific field we're displaying
-            // Example for a general case:
+            // Define appropriate labels and colors for Social Capital data based on the specific question type
             
-            if (selectedDataType.includes('Friends') || selectedDataType.includes('Relatives')) {
+            // Check the field prefixes in the data
+            // Extract the prefix from the first key in dataArray
+            var firstKey = '';
+            if (dataArray.length > 0) {
+                firstKey = dataArray[0].group;
+            }
+            
+            // Friends in Town or Relatives in Town
+            if (firstKey.includes('scfriends_') || firstKey.includes('screlatives_')) {
                 labels = {
                     'none': 'None',
                     'vfew': 'Very Few',
@@ -645,9 +809,9 @@ $(document).ready(function() {
                     'Most': '#A5D6A7',
                     'All': '#81C784'
                 };
-            } else if (selectedDataType.includes('Supportiveness') || 
-                      selectedDataType.includes('Open to Ideas') || 
-                      selectedDataType.includes('Well-kept')) {
+            } 
+            // Supportiveness, Open to Ideas, Well-kept Property (has vsa/vsd options)
+            else if (firstKey.includes('scsupportive_') || firstKey.includes('scopenideas_') || firstKey.includes('cswellkept_')) {
                 labels = {
                     'vsa': 'Very Strongly Agree',
                     'sa': 'Strongly Agree',
@@ -667,61 +831,113 @@ $(document).ready(function() {
                     'Strongly Disagree': '#FFAB91',
                     'Very Strongly Disagree': '#E57373'
                 };
-            } else if (selectedDataType.includes('Organization')) {
-                if (selectedDataType.includes('Membership')) {
-                    labels = {
-                        'none': 'None',
-                        '1plus': '1 or more',
-                        '2plus': '2 or more',
-                        '3plus': '3 or more',
-                        '4plus': '4 or more'
-                    };
-                } else if (selectedDataType.includes('Activity Level')) {
-                    labels = {
-                        'not': 'Not Active',
-                        'little': 'A Little Active',
-                        'some': 'Somewhat Active', 
-                        'very': 'Very Active'
-                    };
-                } else if (selectedDataType.includes('Local vs Outside')) {
-                    labels = {
-                        'local': 'Local Only',
-                        'outside': 'Outside Only',
-                        'both': 'Both',
-                        'none': 'None'
-                    };
-                } else {
-                    labels = {
-                        'sa': 'Strongly Agree',
-                        'a': 'Agree',
-                        'n': 'Neutral',
-                        'd': 'Disagree',
-                        'sd': 'Strongly Disagree'
-                    };
-                }
+            }
+            // Organization membership types (1plus, 2plus, etc.)
+            else if (firstKey.includes('sclocalorg_') || firstKey.includes('scoutsideorg_')) {
+                labels = {
+                    'none': 'None',
+                    '1plus': '1 or more',
+                    '2plus': '2 or more',
+                    '3plus': '3 or more',
+                    '4plus': '4 or more'
+                };
                 
-                // Create a color gradient for organization-related data
                 colorScale = {
                     'None': '#FFAB91',
-                    'Not Active': '#FFAB91',
-                    'Local Only': '#81C784',
-                    'Outside Only': '#64B5F6',
-                    'Both': '#7986CB',
-                    'A Little Active': '#FFCC80',
-                    'Somewhat Active': '#C5E1A5',
-                    'Very Active': '#81C784',
                     '1 or more': '#C5E1A5',
                     '2 or more': '#A5D6A7',
                     '3 or more': '#81C784',
-                    '4 or more': '#66BB6A',
-                    'Strongly Agree': '#81C784',
-                    'Agree': '#A5D6A7',
-                    'Neutral': '#EEEEEE',
-                    'Disagree': '#FFCC80',
-                    'Strongly Disagree': '#FFAB91'
+                    '4 or more': '#66BB6A'
                 };
-            } else {
-                // Default case for other Social Capital metrics
+            }
+            // Activity level in organizations
+            else if (firstKey.includes('scactiveorg_')) {
+                labels = {
+                    'not': 'Not Active',
+                    'little': 'A Little Active',
+                    'some': 'Somewhat Active', 
+                    'very': 'Very Active'
+                };
+                
+                colorScale = {
+                    'Not Active': '#FFAB91',
+                    'A Little Active': '#FFCC80',
+                    'Somewhat Active': '#C5E1A5',
+                    'Very Active': '#81C784'
+                };
+            }
+            // Local vs outside organizations
+            else if (firstKey.includes('sclocoutorg_')) {
+                labels = {
+                    'local': 'Local Only',
+                    'outside': 'Outside Only',
+                    'both': 'Both',
+                    'none': 'None'
+                };
+                
+                colorScale = {
+                    'Local Only': '#81C784',
+                    'Outside Only': '#64B5F6',
+                    'Both': '#7986CB',
+                    'None': '#FFAB91'
+                };
+            }
+            // Volunteer Participation (has different number ranges)
+            else if (firstKey.includes('cevolunteer_')) {
+                labels = {
+                    'none': 'None',
+                    '1plus': '1 or more',
+                    '1': '1 time',
+                    '2': '2 times',
+                    '3to4': '3 to 4 times',
+                    '5to9': '5 to 9 times',
+                    '10plus': '10 or more times'
+                };
+                
+                colorScale = {
+                    'None': '#FFAB91',
+                    '1 or more': '#C5E1A5',
+                    '1 time': '#C5E1A5',
+                    '2 times': '#A5D6A7',
+                    '3 to 4 times': '#81C784',
+                    '5 to 9 times': '#66BB6A',
+                    '10 or more times': '#388E3C'
+                };
+            }
+            // GO SERV locations (has local/outside/dnu options)
+            else if (firstKey.includes('goserv')) {
+                labels = {
+                    'local': 'In this community',
+                    'outside': 'Outside this community',
+                    'dnu': 'Do not use'
+                };
+                
+                colorScale = {
+                    'In this community': '#81C784',
+                    'Outside this community': '#64B5F6',
+                    'Do not use': '#BCAAA4'
+                };
+            }
+            // NOVOL reasons for not being involved
+            else if (firstKey.includes('novol')) {
+                labels = {
+                    'sa': 'Strongly Agree',
+                    'a': 'Agree',
+                    'n': 'Neutral',
+                    'd': 'Disagree',
+                    'sd': 'Strongly Disagree'
+                };
+                
+                colorScale = {
+                    'Strongly Agree': '#FFAB91', // Reversed color scheme for barriers
+                    'Agree': '#FFCC80',
+                    'Neutral': '#EEEEEE',
+                    'Disagree': '#A5D6A7',
+                    'Strongly Disagree': '#81C784'
+                };
+            }
+            // Default for other agree/disagree scales (sa/a/n/d/sd) patterns
+            else {
                 labels = {
                     'sa': 'Strongly Agree',
                     'a': 'Agree',
