@@ -253,10 +253,17 @@ $(document).ready(function() {
         var selectedType = $(this).val();
         if (selectedType === 'qol') {
             $('#qol_data_type_container').show();
+            $('#soc_data_type_container').hide();
             populateQOLDataType();
+        } else if (selectedType === 'soc') {
+            $('#qol_data_type_container').hide();
+            $('#soc_data_type_container').show();
+            populateSocialCapitalDataType();
         } else {
             $('#qol_data_type_container').hide();
+            $('#soc_data_type_container').hide();
             $('#qol_data_type').empty().append('<option value=""> </option>');
+            $('#soc_data_type').empty().append('<option value=""> </option>');
         }
     });
 
@@ -289,6 +296,42 @@ $(document).ready(function() {
 
         $.each(qolOptions, function(key, label) {
             qolDataTypeSelect.append($('<option>', {
+                value: key,
+                text: label
+            }));
+        });
+    }
+
+    // Populate Social Capital Data Type dropdown
+    function populateSocialCapitalDataType() {
+        var socDataTypeSelect = $('#soc_data_type');
+        socDataTypeSelect.empty();
+        socDataTypeSelect.append('<option value="" selected></option>');
+        
+        var socOptions = {
+            'Friends in Town': 'Friends in Town',
+            'Relatives in Town': 'Relatives in Town',
+            'Supportiveness': 'Supportiveness',
+            'Organizations Working Together': 'Organizations Working Together',
+            'New Residents as Leaders': 'New Residents as Leaders',
+            'Open to Ideas': 'Open to Ideas',
+            'Local Organization Membership': 'Local Organization Membership',
+            'Outside Organization Membership': 'Outside Organization Membership',
+            'Activity Level in Organizations': 'Activity Level in Organizations',
+            'Local vs Outside Organizations': 'Local vs Outside Organizations',
+            'Volunteer Participation': 'Volunteer Participation',
+            'Town Support for Projects': 'Town Support for Projects',
+            'Involvement in Decisions': 'Involvement in Decisions',
+            'Sorry to Leave': 'Sorry to Leave',
+            'Feel at Home': 'Feel at Home',
+            'Town Like Friends': 'Town Like Friends',
+            'Go-for-it Attitude': 'Go-for-it Attitude',
+            'Well-kept Property': 'Well-kept Property',
+            'Looking Out for Self': 'Looking Out for Self'
+        };
+
+        $.each(socOptions, function(key, label) {
+            socDataTypeSelect.append($('<option>', {
                 value: key,
                 text: label
             }));
@@ -338,8 +381,9 @@ $(document).ready(function() {
         var selectedDemographic = $('#demographic').val();
         var selectedTown = $('#town').val();
         var selectedYear = $('#year').val();
-        var selectedQOLType = $('#qol_data_type').val();
         var dataType = $('#data_type').val();
+        var selectedQOLType = $('#qol_data_type').val();
+        var selectedSocialCapitalType = $('#soc_data_type').val();
 
         // Validate form inputs
         var errors = [];
@@ -358,6 +402,10 @@ $(document).ready(function() {
 
         if (dataType === 'qol' && !selectedQOLType) {
             errors.push("Please select a QOL data type.");
+        }
+
+        if (dataType === 'soc' && !selectedSocialCapitalType) {
+            errors.push("Please select a Social Capital data type.");
         }
 
         if (!selectedDemographic) {
@@ -388,20 +436,37 @@ $(document).ready(function() {
 
                 // For each specific demographic, generate a separate bar chart
                 $.each(data.specific_options, function(index, specificDemographic) {
+                    var ajaxData = {
+                        'town': selectedTown,
+                        'demographic': selectedDemographic,
+                        'specific_demographic': specificDemographic,
+                        'data_type': dataType,
+                        'year': selectedYear
+                    };
+
+                    // Add the specific data type parameter based on data type
+                    if (dataType === 'qol') {
+                        ajaxData.qol_data_type = selectedQOLType;
+                    } else if (dataType === 'soc') {
+                        ajaxData.soc_data_type = selectedSocialCapitalType;
+                    }
+
                     $.ajax({
                         url: query_data,
                         method: 'GET',
-                        data: {
-                            'town': selectedTown,
-                            'demographic': selectedDemographic,
-                            'specific_demographic': specificDemographic,
-                            'data_type': dataType,
-                            'qol_data_type': selectedQOLType,
-                            'year': selectedYear
-                        },
+                        data: ajaxData,
                         success: function(response) {
+                            var dataArray = [];
+                            var ratings = null;
+                            
                             if (response.qol_ratings) {
-                                var dataArray = Object.entries(response.qol_ratings).map(([key, value]) => {
+                                ratings = response.qol_ratings;
+                            } else if (response.soc_ratings) {
+                                ratings = response.soc_ratings;
+                            }
+                            
+                            if (ratings) {
+                                dataArray = Object.entries(ratings).map(([key, value]) => {
                                     return { group: key, value: parseFloat(value) };
                                 });
                 
@@ -412,8 +477,10 @@ $(document).ready(function() {
                                 
                                 $('#visualization').append(container);
                                 
-                                // Pass the additional parameters here to renderBarChart
-                                renderBarChart(dataArray, containerId, demographicLabel, selectedYear, selectedTown, dataType, selectedQOLType);
+                                // Pass the appropriate data type, either QOL or Social Capital
+                                var selectedDataType = (dataType === 'qol') ? selectedQOLType : selectedSocialCapitalType;
+                                
+                                renderBarChart(dataArray, containerId, demographicLabel, selectedYear, selectedTown, dataType, selectedDataType);
                                 $('#visualization').css('visibility', 'visible');
                 
                                 chartsRendered++;
@@ -446,7 +513,9 @@ $(document).ready(function() {
     $('#reset-form').on('click', function() {
         $('#selection-form select').val('');
         $('#qol_data_type_container').hide();
+        $('#soc_data_type_container').hide();
         $('#qol_data_type').empty().append('<option value=""> </option>');
+        $('#soc_data_type').empty().append('<option value=""> </option>');
         townInput.val('');  // Clear the town search input
     });
 
@@ -470,7 +539,7 @@ $(document).ready(function() {
     }
 
     // Render bar chart function
-    function renderBarChart(dataArray, containerId, demographicLabel, selectedYear, selectedTown, dataType, selectedQOLType) {
+    function renderBarChart(dataArray, containerId, demographicLabel, selectedYear, selectedTown, dataType, selectedDataType) {
         d3.select("#" + containerId).selectAll("*").remove();
 
         var container = d3.select("#" + containerId);
@@ -478,7 +547,7 @@ $(document).ready(function() {
         const width = container.node().getBoundingClientRect().width - margin.left - margin.right;
         const height = 400 - margin.top - margin.bottom;
     
-        // Define qolOptions for human-readable labels
+        // Define options for human-readable labels
         var qolOptions = {
             'Jobs': 'Jobs',
             'Medical': 'Medical',
@@ -499,9 +568,185 @@ $(document).ready(function() {
             'Water': 'Water',
             'govtsrvall': 'Government Services Overall'
         };
+
+        // Define a mapping for Social Capital prefixes to human-readable labels
+        var socPrefixMapping = {
+            'scfriends': 'Friends in Town',
+            'screlatives': 'Relatives in Town',
+            'scsupportive': 'Supportiveness',
+            'scorgsworkall': 'Organizations Working Together',
+            'scnewresleader': 'New Residents as Leaders',
+            'scopenideas': 'Open to Ideas',
+            'sclocalorg': 'Local Organization Membership',
+            'scoutsideorg': 'Outside Organization Membership',
+            'scactiveorg': 'Activity Level in Organizations',
+            'sclocoutorg': 'Local vs Outside Organizations',
+            'cevolunteer': 'Volunteer Participation',
+            'cetowngetsbehind': 'Town Support for Projects',
+            'ceinvolvdecisions': 'Involvement in Decisions',
+            'casorryleave': 'Sorry to Leave',
+            'cafeelhome': 'Feel at Home',
+            'catownlikefriends': 'Town Like Friends',
+            'csmoregoforit': 'Go-for-it Attitude',
+            'cswellkept': 'Well-kept Property',
+            'cslookoutforself': 'Looking Out for Self'
+        };
     
-        // Get the human-readable QOL data type
-        var qolLabel = qolOptions[selectedQOLType] || selectedQOLType; // Default to original if not found in qolOptions
+        // Get the human-readable data type label
+        var dataTypeLabel = '';
+        if (dataType === 'qol') {
+            dataTypeLabel = qolOptions[selectedDataType] || selectedDataType;
+        } else if (dataType === 'soc') {
+            dataTypeLabel = selectedDataType; // For Social Capital, the selectedDataType is already a human-readable label
+        }
+        
+        // Define color scales and label mappings based on data type
+        var colorScale = {};
+        var labels = {};
+        
+        if (dataType === 'qol') {
+            labels = {
+                'vg': 'Very Good',
+                'g': 'Good',
+                'f': 'Fair',
+                'p': 'Poor',
+                'dnk': 'Uncertain',
+                'na': 'None'
+            };
+            
+            colorScale = {
+                'Very Good': '#A5D6A7',
+                'Good': '#C5E1A5',
+                'Fair': '#FFF59D',
+                'Poor': '#FFAB91',
+                'Uncertain': '#FFCC80',
+                'None': '#BCAAA4'
+            };
+        } else if (dataType === 'soc') {
+            // Define appropriate labels and colors for Social Capital data
+            // This will depend on the specific field we're displaying
+            // Example for a general case:
+            
+            if (selectedDataType.includes('Friends') || selectedDataType.includes('Relatives')) {
+                labels = {
+                    'none': 'None',
+                    'vfew': 'Very Few',
+                    'some': 'Some',
+                    'half': 'About Half',
+                    'most': 'Most',
+                    'all': 'All'
+                };
+                
+                colorScale = {
+                    'None': '#FFAB91',
+                    'Very Few': '#FFCC80',
+                    'Some': '#FFF59D',
+                    'About Half': '#C5E1A5',
+                    'Most': '#A5D6A7',
+                    'All': '#81C784'
+                };
+            } else if (selectedDataType.includes('Supportiveness') || 
+                      selectedDataType.includes('Open to Ideas') || 
+                      selectedDataType.includes('Well-kept')) {
+                labels = {
+                    'vsa': 'Very Strongly Agree',
+                    'sa': 'Strongly Agree',
+                    'a': 'Agree',
+                    'n': 'Neutral',
+                    'd': 'Disagree',
+                    'sd': 'Strongly Disagree',
+                    'vsd': 'Very Strongly Disagree'
+                };
+                
+                colorScale = {
+                    'Very Strongly Agree': '#388E3C',
+                    'Strongly Agree': '#81C784',
+                    'Agree': '#A5D6A7',
+                    'Neutral': '#EEEEEE',
+                    'Disagree': '#FFCC80',
+                    'Strongly Disagree': '#FFAB91',
+                    'Very Strongly Disagree': '#E57373'
+                };
+            } else if (selectedDataType.includes('Organization')) {
+                if (selectedDataType.includes('Membership')) {
+                    labels = {
+                        'none': 'None',
+                        '1plus': '1 or more',
+                        '2plus': '2 or more',
+                        '3plus': '3 or more',
+                        '4plus': '4 or more'
+                    };
+                } else if (selectedDataType.includes('Activity Level')) {
+                    labels = {
+                        'not': 'Not Active',
+                        'little': 'A Little Active',
+                        'some': 'Somewhat Active', 
+                        'very': 'Very Active'
+                    };
+                } else if (selectedDataType.includes('Local vs Outside')) {
+                    labels = {
+                        'local': 'Local Only',
+                        'outside': 'Outside Only',
+                        'both': 'Both',
+                        'none': 'None'
+                    };
+                } else {
+                    labels = {
+                        'sa': 'Strongly Agree',
+                        'a': 'Agree',
+                        'n': 'Neutral',
+                        'd': 'Disagree',
+                        'sd': 'Strongly Disagree'
+                    };
+                }
+                
+                // Create a color gradient for organization-related data
+                colorScale = {
+                    'None': '#FFAB91',
+                    'Not Active': '#FFAB91',
+                    'Local Only': '#81C784',
+                    'Outside Only': '#64B5F6',
+                    'Both': '#7986CB',
+                    'A Little Active': '#FFCC80',
+                    'Somewhat Active': '#C5E1A5',
+                    'Very Active': '#81C784',
+                    '1 or more': '#C5E1A5',
+                    '2 or more': '#A5D6A7',
+                    '3 or more': '#81C784',
+                    '4 or more': '#66BB6A',
+                    'Strongly Agree': '#81C784',
+                    'Agree': '#A5D6A7',
+                    'Neutral': '#EEEEEE',
+                    'Disagree': '#FFCC80',
+                    'Strongly Disagree': '#FFAB91'
+                };
+            } else {
+                // Default case for other Social Capital metrics
+                labels = {
+                    'sa': 'Strongly Agree',
+                    'a': 'Agree',
+                    'n': 'Neutral',
+                    'd': 'Disagree',
+                    'sd': 'Strongly Disagree'
+                };
+                
+                colorScale = {
+                    'Strongly Agree': '#81C784',
+                    'Agree': '#A5D6A7',
+                    'Neutral': '#EEEEEE',
+                    'Disagree': '#FFCC80',
+                    'Strongly Disagree': '#FFAB91'
+                };
+            }
+        }
+    
+        // Format the data
+        var formattedData = dataArray.map(function(d) {
+            var groupParts = d.group.split('_');
+            var keySuffix = groupParts[groupParts.length - 1];
+            var newLabel = labels[keySuffix] || keySuffix;
+            return { group: newLabel, value: d.value };
+        });
     
         // Append an SVG element for the chart with margins
         var svg = container.append("svg")
@@ -509,31 +754,6 @@ $(document).ready(function() {
             .attr("height", height + margin.top + margin.bottom)
             .append("g")
             .attr("transform", "translate(" + margin.left + "," + margin.top + ")"); // Adjusted translate for more space
-    
-        var labels = {
-            'vg': 'Very Good',
-            'g': 'Good',
-            'f': 'Fair',
-            'p': 'Poor',
-            'dnk': 'Uncertain',
-            'na': 'None'
-        };
-    
-        var colorScale = {
-            'Very Good': '#A5D6A7',
-            'Good': '#C5E1A5',
-            'Fair': '#FFF59D',
-            'Poor': '#FFAB91',
-            'Uncertain': '#FFCC80',
-            'None': '#BCAAA4'
-        };
-    
-        // Format the data
-        var formattedData = dataArray.map(function(d) {
-            var keySuffix = d.group.split('_').pop();
-            var newLabel = labels[keySuffix] || keySuffix;
-            return { group: newLabel, value: d.value };
-        });
     
         // X axis
         var x = d3.scaleBand()
@@ -562,7 +782,7 @@ $(document).ready(function() {
             .attr("y", d => y(0))
             .attr("width", x.bandwidth())
             .attr("height", 0)
-            .attr("fill", d => colorScale[d.group])
+            .attr("fill", d => colorScale[d.group] || "#A5D6A7") // Default color if not found
             .transition()
             .duration(800)
             .attr("y", d => y(d.value))
@@ -578,11 +798,16 @@ $(document).ready(function() {
             .attr("x", d => x(d.group) + x.bandwidth() / 2)
             .attr("y", d => y(d.value) - 5)
             .attr("dy", ".75em")
-            .text(d => d.value)
+            .text(d => d.value.toFixed(2))
             .attr("fill", "#333")
             .style("font-size", "12px")
             .style("text-anchor", "middle");
     
+        // Prepare the data type label based on the type of data
+        var dataTypeLabel = dataType === 'qol' ? 
+            `Quality of Life - ${dataTypeLabel}` : 
+            `Social Capital - ${dataTypeLabel}`;
+            
         // Add demographic label to the regular labels in the label container
         container.append("div")
             .attr("class", "label-container")
@@ -590,8 +815,7 @@ $(document).ready(function() {
                 <strong>Demographic:</strong> ${demographicLabel}<br>
                 <strong>Year:</strong> ${selectedYear}<br>
                 <strong>Town:</strong> ${selectedTown}<br>
-                <strong>Data Type:</strong> ${dataType === 'qol' ? 'Quality of Life' : 'Other'}<br>
-                ${dataType === 'qol' ? `<strong>QOL Data Type:</strong> ${qolLabel}<br>` : ''}
+                <strong>Data Type:</strong> ${dataTypeLabel}<br>
             `);
         
         container.append("button")
@@ -601,7 +825,7 @@ $(document).ready(function() {
             .on("click", function() {
                 downloadChartAsImage(containerId, demographicLabel, selectedYear, selectedTown);
             });
-    }   
+    }
 
     function downloadChartAsImage(containerId, demographicLabel, selectedYear, selectedTown) {
         var container = document.getElementById(containerId);
@@ -635,6 +859,3 @@ $(document).ready(function() {
         return labels[specificDemographic] || specificDemographic;
     }
 });
-
-//so as you know from my code, it creates different graphs based on your dropdown selections. These charts are being generated using the library D3js. 
-//Is it possible to make like a small copy button that basically copies the generated graph image with the labels?

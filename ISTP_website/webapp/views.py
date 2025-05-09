@@ -1,5 +1,8 @@
 from django.shortcuts import render
-from .models import Qol, Qol1994, Qol2004
+from webapp.models import Qol, Qol1994, Qol2004
+from .models_soc1994 import Soc1994
+from .models_soc2004 import Soc2004
+from .models_soc2014 import Soc2014
 import pandas as pd
 from django.http import JsonResponse, HttpResponse
 import logging
@@ -35,11 +38,28 @@ def index(request):
             'Condition of Streets', 'Condition of Parks', 'Garbage Collection',
             'Water', 'Government Services Overall'
         ]
+        social_capital_data_types = [
+            'Friends in Town', 'Relatives in Town', 'Supportiveness', 
+            'Organizations Working Together', 'New Residents as Leaders',
+            'Open to Ideas', 'Local Organization Membership', 'Outside Organization Membership',
+            'Activity Level in Organizations', 'Local vs Outside Organizations',
+            'Volunteer Participation', 'Town Support for Projects', 'Involvement in Decisions',
+            'Sorry to Leave', 'Feel at Home', 'Town Like Friends', 'Go-for-it Attitude',
+            'Well-kept Property', 'Looking Out for Self'
+        ]
+        
+        data_types = [
+            {'id': 'qol', 'name': 'Quality of Life'},
+            {'id': 'soc', 'name': 'Social Capital'}
+        ]
+        
         logger.debug(f"Retrieved {len(towns)} towns for data page")
         return render(request, 'app/data.html', {
             'towns': towns,
             'demographics': demographics,
-            'qol_data_types': qol_data_types
+            'qol_data_types': qol_data_types,
+            'social_capital_data_types': social_capital_data_types,
+            'data_types': data_types
         })
     except Exception as e:
         logger.error(f"Error in index view: {str(e)}", exc_info=True)
@@ -254,14 +274,14 @@ def query_data(request):
     try:
         town = request.GET.get('town')
         specific_demographic = request.GET.get('specific_demographic')
-        qol_data_type = request.GET.get('qol_data_type')
+        data_type = request.GET.get('data_type')
         year = request.GET.get('year', '2014')  # Default to 2014
 
-        logger.info(f"Year: {year}, Town: {town}, Demographic: {specific_demographic}, QOL Data Type: {qol_data_type}")
+        logger.info(f"Year: {year}, Town: {town}, Demographic: {specific_demographic}, Data Type: {data_type}")
         
         # Validate input parameters
-        if not town or not specific_demographic or not qol_data_type:
-            logger.warning(f"Missing parameters in query_data: town={town}, demographic={specific_demographic}, qol_type={qol_data_type}")
+        if not town or not specific_demographic or not data_type:
+            logger.warning(f"Missing parameters in query_data: town={town}, demographic={specific_demographic}, data_type={data_type}")
             return JsonResponse({'error': 'Missing required parameters'}, status=400)
             
         # Validate year
@@ -270,28 +290,31 @@ def query_data(request):
             logger.warning(f"Invalid year parameter: {year}")
             return JsonResponse({'error': 'Invalid year parameter'}, status=400)
 
+        # Handle different data types
+        if data_type == 'qol':
+            qol_data_type = request.GET.get('qol_data_type')
+            if not qol_data_type:
+                return JsonResponse({'error': 'Missing Quality of Life data type parameter'}, status=400)
+            return query_qol_data(request, town, specific_demographic, qol_data_type, year)
+        elif data_type == 'soc':
+            soc_data_type = request.GET.get('soc_data_type')
+            if not soc_data_type:
+                return JsonResponse({'error': 'Missing Social Capital data type parameter'}, status=400)
+            return query_social_capital_data(request, town, specific_demographic, soc_data_type, year)
+        else:
+            return JsonResponse({'error': 'Invalid data type selected.'}, status=400)
+    except Exception as e:
+        logger.error(f"Error querying data: {str(e)}")
+        return JsonResponse({'error': 'An error occurred processing your request.'})
+
+def query_qol_data(request, town, specific_demographic, qol_data_type, year):
+    try:
         # Map years to their respective models
         model_mapping = {
             '1994': Qol1994,
             '2004': Qol2004,
             '2014': Qol
         }
-
-        results = {}
-        if year == 'All':
-            for yr, model in model_mapping.items():
-                # Use safe_values instead of values
-                qol_data = safe_values(model.objects.filter(name=town, cat=specific_demographic)).first()
-                if qol_data:
-                    results[yr] = {key: qol_data[key] for key in qol_data if key.startswith(f'qol{qol_data_type.lower()}')}
-        else:
-            model = model_mapping.get(year)
-            # Use safe_values instead of values
-            qol_data = safe_values(model.objects.filter(name=town, cat=specific_demographic)).first()
-            if qol_data:
-                results[year] = {key: qol_data[key] for key in qol_data if key.startswith(f'qol{qol_data_type.lower()}')}
-
-        QolModel = model_mapping.get(year, Qol)  # Use Qol as default if year is not recognized
 
         demographic_mapping = {
             'All respondents': 'ALL',
@@ -309,12 +332,12 @@ def query_data(request):
             'Income in the 80th-99th percentile': 'INC4'
         }
 
+        QolModel = model_mapping.get(year, Qol)  # Use Qol as default if year is not recognized
+
         if not QolModel:
             raise ValueError(f"Invalid year: {year}")
 
-        cat_value = demographic_mapping.get(specific_demographic)
-        if not cat_value:
-            return JsonResponse({'error': 'Invalid demographic selected.'})
+        cat_value = demographic_mapping.get(specific_demographic, specific_demographic)
 
         qol_data = QolModel.objects.filter(name=town, cat=cat_value).values().first()
         if qol_data:
@@ -324,4 +347,73 @@ def query_data(request):
             return JsonResponse({'error': 'No data found for the selected options.'})
     except Exception as e:
         logger.error(f"Error querying QOL data: {str(e)}")
+        return JsonResponse({'error': 'An error occurred processing your request.'})
+
+def query_social_capital_data(request, town, specific_demographic, soc_data_type, year):
+    try:
+        # Map years to their respective models
+        model_mapping = {
+            '1994': Soc1994,
+            '2004': Soc2004,
+            '2014': Soc2014
+        }
+
+        # Map social capital data types to their field prefixes
+        soc_prefix_mapping = {
+            'Friends in Town': 'scfriends',
+            'Relatives in Town': 'screlatives',
+            'Supportiveness': 'scsupportive',
+            'Organizations Working Together': 'scorgsworkall',
+            'New Residents as Leaders': 'scnewresleader',
+            'Open to Ideas': 'scopenideas',
+            'Local Organization Membership': 'sclocalorg',
+            'Outside Organization Membership': 'scoutsideorg',
+            'Activity Level in Organizations': 'scactiveorg',
+            'Local vs Outside Organizations': 'sclocoutorg',
+            'Volunteer Participation': 'cevolunteer',
+            'Town Support for Projects': 'cetowngetsbehind',
+            'Involvement in Decisions': 'ceinvolvdecisions',
+            'Sorry to Leave': 'casorryleave',
+            'Feel at Home': 'cafeelhome',
+            'Town Like Friends': 'catownlikefriends',
+            'Go-for-it Attitude': 'csmoregoforit',
+            'Well-kept Property': 'cswellkept',
+            'Looking Out for Self': 'cslookoutforself'
+        }
+
+        demographic_mapping = {
+            'All respondents': 'ALL',
+            '18-44 years': 'AGE1',
+            '45-64 years': 'AGE2',
+            '65 years and older': 'AGE3',
+            'Men': 'SEX1M',
+            'Women': 'SEX2F',
+            'Lived in town 1-9 years': 'TENURE1',
+            'Lived in town 10-19 years': 'TENURE2',
+            'Lived in town 20 years or more': 'TENURE3',
+            'Income in the 1st-19th percentile': 'INC1',
+            'Income in the 20th-49th percentile': 'INC2',
+            'Income in the 50th-79th percentile': 'INC3',
+            'Income in the 80th-99th percentile': 'INC4'
+        }
+
+        SocModel = model_mapping.get(year)
+        if not SocModel:
+            raise ValueError(f"Invalid year: {year}")
+
+        cat_value = demographic_mapping.get(specific_demographic, specific_demographic)
+        prefix = soc_prefix_mapping.get(soc_data_type)
+        
+        if not prefix:
+            return JsonResponse({'error': 'Invalid Social Capital data type selected.'})
+
+        soc_data = SocModel.objects.filter(name=town, cat=cat_value).values().first()
+        
+        if soc_data:
+            soc_ratings = {key: soc_data[key] for key in soc_data if key.lower().startswith(prefix.lower())}
+            return JsonResponse({'soc_ratings': soc_ratings})
+        else:
+            return JsonResponse({'error': 'No data found for the selected options.'})
+    except Exception as e:
+        logger.error(f"Error querying Social Capital data: {str(e)}")
         return JsonResponse({'error': 'An error occurred processing your request.'})

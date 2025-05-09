@@ -23,9 +23,10 @@
     <div class="instruction">
         <h4>How does this work?</h4>
         <ul>
-            <li><strong>Select the Year:</strong> Choose a year from the available options (1994 to 2024) in ten-year increments.</li>
+            <li><strong>Select the Year:</strong> Choose a year from the available options (1994 to 2014) in ten-year increments.</li>
             <li><strong>Choose a Town:</strong> Select the town for which you want to view data.</li>
-            <li><strong>Choose a Data Type:</strong> Pick the type of data to view, such as Quality of Life (QOL) or Covid-19 Poll data.</li>
+            <li><strong>Choose a Data Type:</strong> Pick the type of data to view, such as Quality of Life (QOL) or Social Capital data.</li>
+            <li><strong>Select Data Category:</strong> Choose the specific data category you want to visualize.</li>
             <li><strong>Select Demographic Category:</strong> Choose a category like Age, Income, Sex, Tenure, or 'All' for an overall view.</li>
             <li><strong>Visualize the data:</strong> Click "Visualize" to visualize the data in a bar graph.</li>
             <li><strong>Reset Options:</strong> You may reset your options by clicking on the "Reset Options" button. This will clear all your options and you select different values.</li>
@@ -52,13 +53,22 @@
         <label for="data_type">Select Type of Data:</label>
         <select name="data_type" id="data_type">
             <option value=""> </option>
-            <option value="qol">Quality of Life</option>
-            <option value="other">Other datas...</option>
+            {% for type in data_types %}
+                <option value="{{ type.id }}">{{ type.name }}</option>
+            {% endfor %}
         </select>
 
-        <div id="qol_data_type_container">
-            <label for="qol_data_type">Select QOL Data Type:</label>
+        <div id="qol_data_type_container" style="display: none;">
+            <label for="qol_data_type">Select Quality of Life Category:</label>
             <select name="qol_data_type" id="qol_data_type">
+                <option value=""> </option>
+                <!-- Options will be dynamically loaded -->
+            </select>
+        </div>
+        
+        <div id="soc_data_type_container" style="display: none;">
+            <label for="soc_data_type">Select Social Capital Category:</label>
+            <select name="soc_data_type" id="soc_data_type">
                 <option value=""> </option>
                 <!-- Options will be dynamically loaded -->
             </select>
@@ -73,7 +83,7 @@
         </select>
 
         <div class="button-container">
-            <button type="submit">Get Data</button>
+            <button type="submit">Visualize</button>
             <button type="button" id="reset-form">Reset Options</button>
         </div>
     </form>

@@ -6,6 +6,11 @@
 #   * Remove `managed = False` lines if you wish to allow Django to create, modify, and delete the table
 # Feel free to rename the models, but don't rename db_table values or field names.
 from django.db import models
+from .models_qol1994 import Qol1994
+from .models_qol2004 import Qol2004
+from .models_soc1994 import Soc1994
+from .models_soc2004 import Soc2004
+from .models_soc2014 import Soc2014
 
 
 class Qol(models.Model):

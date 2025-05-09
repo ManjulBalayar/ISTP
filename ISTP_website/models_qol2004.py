@@ -10,7 +10,7 @@ from django.db import models
 
 class Qol2004(models.Model):
     year = models.IntegerField(db_column='Year', blank=True, null=True)  # Field name made lowercase.
-    commid = models.IntegerField(db_column='CommID', blank=True, null=True)  # Field name made lowercase.
+    commid = models.IntegerField(db_column='CommID', blank=True, primary_key=True)  # Field name made lowercase.
     fipspl = models.IntegerField(db_column='FIPSPL', blank=True, null=True)  # Field name made lowercase.
     name = models.TextField(db_column='Name', blank=True, null=True)  # Field name made lowercase.
     cat = models.TextField(db_column='CAT', blank=True, null=True)  # Field name made lowercase.
