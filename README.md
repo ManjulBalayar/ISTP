@@ -1,6 +1,6 @@
 # ISTP Research Website
 
-A Django-based web application for displaying and analyzing Quality of Life (QOL) survey data across different towns and demographics.
+A Django-based web application for displaying and analyzing Quality of Life (QOL) survey data across different towns and demographics. Link to website: www.agpolicyiowastate.org
 
 ## Features
 
