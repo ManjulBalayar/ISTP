@@ -4,7 +4,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Data Visualization</title>
+    <title>ISTP Data Visualization Tool</title>
     {% load static %}
     <link rel="stylesheet" href="{% static 'css/data.css' %}">
     <script src="https://d3js.org/d3.v7.min.js"></script>
@@ -20,81 +20,96 @@
     <script src="{% static 'js/data.js' %}"></script>
 </head>
 <body data-demographics-url="{% url 'demographics' %}">
-    <div class="instruction">
-        <h4>How does this work?</h4>
-        <ul>
-            <li><strong>Choose a Data Type:</strong> First, select whether you want to view Quality of Life (QOL) or Social Capital data.</li>
-            <li><strong>Select the Year:</strong> Choose a year from the available options (1994 to 2014) in ten-year increments.</li>
-            <li><strong>Choose a Town:</strong> Select the town for which you want to view data.</li>
-            <li><strong>Select Data Category:</strong> Choose the specific data category you want to visualize.</li>
-            <li><strong>Select Demographic Category:</strong> Choose a category like Age, Income, Sex, Tenure, or 'All' for an overall view.</li>
-            <li><strong>Visualize the data:</strong> Click "Visualize" to visualize the data in a bar graph.</li>
-            <li><strong>Reset Options:</strong> You may reset your options by clicking on the "Reset Options" button. This will clear all your options and you select different values.</li>
-        </ul>
-    </div>
-    <form id="selection-form" action="{% url 'query_data' %}" method="get">
-        <div id="data_type_container">
-            <label for="data_type">Select Type of Data:</label>
-            <select name="data_type" id="data_type">
-                <option value=""> </option>
-                {% for type in data_types %}
-                    <option value="{{ type.id }}">{{ type.name }}</option>
-                {% endfor %}
-            </select>
-        </div>
-
-        <div id="year_container">
-            <label for="year">Select Year:</label>
-            <select name="year" id="year">
-                <option value=""></option>
-                <option value="2014">2014</option>
-                <option value="2004">2004</option>
-                <option value="1994">1994</option>
-            </select>
-        </div>
-
-        <div id="town_container">
-            <label for="town-search">Select Town:</label>
-            <input type="text" id="town-search" placeholder="Type to search for a town">
-            <select name="town" id="town" style="display: none;">
-                <option value=""> </option>
-                {% for town in towns %}
-                    <option value="{{ town }}">{{ town }}</option>
-                {% endfor %}
-            </select>
-        </div>
-
-        <div id="qol_data_type_container" style="display: none;">
-            <label for="qol_data_type">Select Quality of Life Category:</label>
-            <select name="qol_data_type" id="qol_data_type">
-                <option value=""> </option>
-                <!-- Options will be dynamically loaded -->
-            </select>
-        </div>
+    <div class="container mt-4">
+        <h1 style="color: #C8102E; font-weight: bold; text-align: center; margin-bottom: 1.5rem; font-family: 'Times New Roman', Times, serif;">ISTP Data Visualization Tool</h1>
         
-        <div id="soc_data_type_container" style="display: none;">
-            <label for="soc_data_type">Select Social Capital Category:</label>
-            <select name="soc_data_type" id="soc_data_type">
-                <option value=""> </option>
-                <!-- Options will be dynamically loaded -->
-            </select>
+        <p style="text-align: center; margin-bottom: 2rem; font-size: 1.1rem;">
+            The data tool allows users to explore ISTP data for each of the 99 communities. Data are displayed as charts with percentages. Users can display data for a community by year, indicator, and by demographic groupings. For questions, contact Dr. David Peters at <a href="mailto:istp@iastate.edu" style="color: #C8102E;">istp@iastate.edu</a>.
+        </p>
+
+        <div class="instruction" style="background: white; border: 2px solid #C8102E; border-radius: 8px; padding: 1.5rem; margin-bottom: 2rem;">
+            <h4 style="color: #C8102E; font-weight: bold; margin-bottom: 1rem;">Instructions:</h4>
+            <ul style="list-style: disc !important; padding-left: 1rem !important; margin-left: 0 !important;">
+                <li style="margin-bottom: 0.5rem; padding-left: 0 !important; position: static !important;">Select Topic (Quality of Life or Social Capital)</li>
+                <li style="margin-bottom: 0.5rem; padding-left: 0 !important; position: static !important;">Select the Data Indicator</li>
+                <li style="margin-bottom: 0.5rem; padding-left: 0 !important; position: static !important;">Select the Year (1994, 2004, or 2014. 2024 will be released soon)</li>
+                <li style="margin-bottom: 0.5rem; padding-left: 0 !important; position: static !important;">Select the Community</li>
+                <li style="margin-bottom: 0.5rem; padding-left: 0 !important; position: static !important;">Select the Demographic Breakout (age, sex, tenure, income, or all persons)</li>
+                <li style="margin-bottom: 0.5rem; padding-left: 0 !important; position: static !important;">Select Visualize to generate the charts</li>
+                <li style="margin-bottom: 0.5rem; padding-left: 0 !important; position: static !important;">Select Reset to clear all your options and start over.</li>
+            </ul>
         </div>
 
-        <div id="demographic_container">
-            <label for="demographic">Select Demographic:</label>
-            <select name="demographic" id="demographic">
-                <option value=""> </option>
-                {% for demo in demographics %}
-                    <option value="{{ demo }}">{{ demo }}</option>
-                {% endfor %}
-            </select>
-        </div>
+        <form id="selection-form" action="{% url 'query_data' %}" method="get" style="background: white; border: 1px solid #e0e0e0; border-radius: 8px; padding: 2rem; margin-bottom: 2rem;">
+            <!-- 1. Topic -->
+            <div id="data_type_container" style="margin-bottom: 1.5rem;">
+                <label for="data_type" style="display: block; margin-bottom: 0.5rem; font-weight: bold;">Topic:</label>
+                <select name="data_type" id="data_type" style="width: 100%; padding: 0.5rem; border: 1px solid #ccc; border-radius: 4px;">
+                    <option value=""> </option>
+                    {% for type in data_types %}
+                        <option value="{{ type.id }}">{{ type.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
 
-        <div class="button-container">
-            <button type="submit">Visualize</button>
-            <button type="button" id="reset-form">Reset Options</button>
-        </div>
-    </form>
+            <!-- 2. Data Indicator (QOL) -->
+            <div id="qol_data_type_container" style="display: none; margin-bottom: 1.5rem;">
+                <label for="qol_data_type" style="display: block; margin-bottom: 0.5rem; font-weight: bold;">Data Indicator:</label>
+                <select name="qol_data_type" id="qol_data_type" style="width: 100%; padding: 0.5rem; border: 1px solid #ccc; border-radius: 4px;">
+                    <option value=""> </option>
+                    <!-- Options will be dynamically loaded -->
+                </select>
+            </div>
+            
+            <!-- 2. Data Indicator (Social Capital) -->
+            <div id="soc_data_type_container" style="display: none; margin-bottom: 1.5rem;">
+                <label for="soc_data_type" style="display: block; margin-bottom: 0.5rem; font-weight: bold;">Data Indicator:</label>
+                <select name="soc_data_type" id="soc_data_type" style="width: 100%; padding: 0.5rem; border: 1px solid #ccc; border-radius: 4px;">
+                    <option value=""> </option>
+                    <!-- Options will be dynamically loaded -->
+                </select>
+            </div>
+
+            <!-- 3. Year -->
+            <div id="year_container" style="display: none; margin-bottom: 1.5rem;">
+                <label for="year" style="display: block; margin-bottom: 0.5rem; font-weight: bold;">Year:</label>
+                <select name="year" id="year" style="width: 100%; padding: 0.5rem; border: 1px solid #ccc; border-radius: 4px;">
+                    <option value=""></option>
+                    <option value="2014">2014</option>
+                    <option value="2004">2004</option>
+                    <option value="1994">1994</option>
+                </select>
+            </div>
+
+            <!-- 4. Community -->
+            <div id="town_container" style="display: none; margin-bottom: 1.5rem;">
+                <label for="town-search" style="display: block; margin-bottom: 0.5rem; font-weight: bold;">Community:</label>
+                <input type="text" id="town-search" placeholder="Type to search for a town" style="width: 100%; padding: 0.5rem; border: 1px solid #ccc; border-radius: 4px;">
+                <select name="town" id="town" style="display: none;">
+                    <option value=""> </option>
+                    {% for town in towns %}
+                        <option value="{{ town }}">{{ town }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- 5. Demographic Breakout -->
+            <div id="demographic_container" style="display: none; margin-bottom: 1.5rem;">
+                <label for="demographic" style="display: block; margin-bottom: 0.5rem; font-weight: bold;">Demographic Breakout:</label>
+                <select name="demographic" id="demographic" style="width: 100%; padding: 0.5rem; border: 1px solid #ccc; border-radius: 4px;">
+                    <option value=""> </option>
+                    {% for demo in demographics %}
+                        <option value="{{ demo }}">{{ demo }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="button-container" style="text-align: center; margin-top: 2rem;">
+                <button type="submit" style="background: #C8102E; color: white; border: none; padding: 0.75rem 2rem; border-radius: 4px; font-weight: bold; margin-right: 1rem;">Visualize</button>
+                <button type="button" id="reset-form" style="background: #adb5bd; color: black; border: none; padding: 0.75rem 2rem; border-radius: 4px; font-weight: bold;">Reset</button>
+            </div>
+        </form>
+    </div>
 
     <div id="qol-results">
         <!-- Queried data will be displayed here -->
@@ -107,16 +122,5 @@
     <!-- Script for html2canvas library -->
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 </body>
-
-<!-- <footer>
-    Iowa State College of Agriculture and Life Sciences &nbsp; | &nbsp;
-    <a href="{% url 'home'%}">Home</a> &nbsp; | &nbsp; <a href="{% url 'index'%}">ISTP Data</a> &nbsp; | &nbsp; <a href="#">About</a>
-    <br>
-    302 East Hall &nbsp; | &nbsp; Email: dpeters@iastate.edu
-    <br>
-    510 Farm House Lane &nbsp; | &nbsp; Phone: 515-294-6303
-    <br>
-    Ames, Iowa 50011-1054
-</footer> -->
 
 {% endblock %}

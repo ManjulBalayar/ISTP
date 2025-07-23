@@ -24,6 +24,11 @@ def home(request):
     logger.info(f"Home page accessed by {request.META.get('REMOTE_ADDR')}")
     return render(request, 'app/home.html')
 
+@ratelimit(key='ip', rate='10/m')
+def town_profiles(request):
+    logger.info(f"Town profiles page accessed by {request.META.get('REMOTE_ADDR')}")
+    return render(request, 'app/town_profiles.html')
+
 @ratelimit(key='ip', rate='20/m')
 def index(request):
     logger.info(f"Data page accessed by {request.META.get('REMOTE_ADDR')}")
@@ -430,3 +435,5 @@ def query_social_capital_data(request, town, specific_demographic, soc_data_type
     except Exception as e:
         logger.error(f"Error querying Social Capital data: {str(e)}")
         return JsonResponse({'error': 'An error occurred processing your request.'})
+
+        

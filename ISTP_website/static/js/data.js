@@ -248,22 +248,67 @@ function renderPieChart(data, qolDataType) {
 }
 
 $(document).ready(function() {
-    // Hide all form elements except the first one (data type) initially
+    
     hideAllFormElementsExceptFirst();
     
-    // When 'Select Type of Data' changes
+    // When 'Topic' (data_type) changes
     $('#data_type').change(function() {
         var selectedType = $(this).val();
         // Clear and hide all elements that come after this selection
         clearFollowingSelections('data_type');
         
         if (selectedType) {
+            // Show the appropriate data indicator container based on topic
+            if (selectedType === 'qol') {
+                $('#qol_data_type_container').show();
+                $('#soc_data_type_container').hide();
+                $('#soc_data_type').val('');
+                populateQOLDataType();
+            } else if (selectedType === 'soc') {
+                $('#soc_data_type_container').show();
+                $('#qol_data_type_container').hide();
+                $('#qol_data_type').val('');
+                populateSocialCapitalDataType();
+            }
+        } else {
+            // If topic is cleared, hide everything else
+            $('#qol_data_type_container, #soc_data_type_container, #year_container, #town_container, #demographic_container').hide();
+            // Clear all values
+            $('#qol_data_type, #soc_data_type, #year, #town, #demographic').val('');
+            $('#town-search').val('');
+        }
+    });
+    
+    // When 'Data Indicator' (QOL) changes
+    $('#qol_data_type').change(function() {
+        var selectedQOLType = $(this).val();
+        // Clear and hide all elements that come after this selection
+        clearFollowingSelections('qol_data_type');
+        
+        if (selectedQOLType) {
             $('#year_container').show();
         } else {
-            // If data type is cleared, hide everything else
-            $('#year_container, #town_container, #qol_data_type_container, #soc_data_type_container, #demographic_container').hide();
+            // If data indicator is cleared, hide everything after it
+            $('#year_container, #town_container, #demographic_container').hide();
             // Clear all values
-            $('#year, #town, #qol_data_type, #soc_data_type, #demographic').val('');
+            $('#year, #town, #demographic').val('');
+            $('#town-search').val('');
+        }
+    });
+    
+    // When 'Data Indicator' (Social Capital) changes
+    $('#soc_data_type').change(function() {
+        var selectedSocialCapitalType = $(this).val();
+        // Clear and hide all elements that come after this selection
+        clearFollowingSelections('soc_data_type');
+        
+        if (selectedSocialCapitalType) {
+            $('#year_container').show();
+        } else {
+            // If data indicator is cleared, hide everything after it
+            $('#year_container, #town_container, #demographic_container').hide();
+            // Clear all values
+            $('#year, #town, #demographic').val('');
             $('#town-search').val('');
         }
     });
@@ -278,126 +323,97 @@ $(document).ready(function() {
             $('#town_container').show();
         } else {
             // If year is cleared, hide everything after it
-            $('#town_container, #qol_data_type_container, #soc_data_type_container, #demographic_container').hide();
+            $('#town_container, #demographic_container').hide();
             // Clear all values
-            $('#town, #qol_data_type, #soc_data_type, #demographic').val('');
+            $('#town, #demographic').val('');
             $('#town-search').val('');
         }
     });
     
-    // When 'Town' changes
+    // When 'Community' (town) changes
     $('#town').change(function() {
         var selectedTown = $(this).val();
-        var selectedType = $('#data_type').val();
         // Clear and hide all elements that come after this selection
         clearFollowingSelections('town');
         
         if (selectedTown) {
-            if (selectedType === 'qol') {
-                $('#qol_data_type_container').show();
-                $('#soc_data_type_container').hide();
-                $('#soc_data_type').val('');
-                populateQOLDataType();
-            } else if (selectedType === 'soc') {
-                $('#soc_data_type_container').show();
-                $('#qol_data_type_container').hide();
-                $('#qol_data_type').val('');
-                populateSocialCapitalDataType();
-            }
-            $('#demographic_container').hide();
-            $('#demographic').val('');
+            $('#demographic_container').show();
         } else {
             // If town is cleared, hide everything after it
-            $('#qol_data_type_container, #soc_data_type_container, #demographic_container').hide();
+            $('#demographic_container').hide();
             // Clear all values
-            $('#qol_data_type, #soc_data_type, #demographic').val('');
-        }
-    });
-    
-    // When QOL data type changes
-    $('#qol_data_type').change(function() {
-        var selectedQOLType = $(this).val();
-        // Clear and hide all elements that come after this selection
-        clearFollowingSelections('qol_data_type');
-        
-        if (selectedQOLType) {
-            $('#demographic_container').show();
-        } else {
-            $('#demographic_container').hide();
-            $('#demographic').val('');
-        }
-    });
-    
-    // When Social Capital data type changes
-    $('#soc_data_type').change(function() {
-        var selectedSocialCapitalType = $(this).val();
-        // Clear and hide all elements that come after this selection
-        clearFollowingSelections('soc_data_type');
-        
-        if (selectedSocialCapitalType) {
-            $('#demographic_container').show();
-        } else {
-            $('#demographic_container').hide();
             $('#demographic').val('');
         }
     });
     
     // Hide all form elements except the first one
     function hideAllFormElementsExceptFirst() {
-        $('#year_container').hide();
-        $('#town_container').hide();
         $('#qol_data_type_container').hide();
         $('#soc_data_type_container').hide();
+        $('#year_container').hide();
+        $('#town_container').hide();
         $('#demographic_container').hide();
     }
     
     // Clear and hide all form elements that come after the specified element
     function clearFollowingSelections(currentElement) {
-        var order = ['data_type', 'year', 'town', 'qol_data_type', 'soc_data_type', 'demographic'];
+        // New order: Topic -> Data Indicator -> Year -> Community -> Demographic Breakout
+        var order = ['data_type', 'qol_data_type', 'soc_data_type', 'year', 'town', 'demographic'];
         var currentIndex = order.indexOf(currentElement);
         
-        // Clear and hide all elements after the current one
-        for (var i = currentIndex + 1; i < order.length; i++) {
-            var elementId = order[i];
-            
-            // Reset values
-            $('#' + elementId).val('');
-            
-            // Hide containers
-            if (elementId === 'qol_data_type') {
-                $('#qol_data_type_container').hide();
-            } else if (elementId === 'soc_data_type') {
-                $('#soc_data_type_container').hide();
-            } else if (elementId === 'town') {
-                $('#town_container').hide();
-                $('#town-search').val(''); // Clear town search input too
-            } else {
-                $('#' + elementId + '_container').hide();
-            }
-        }
-        
-        // If changing data type, we need special handling
+        // Special handling for data_type (Topic) changes - clear everything below
         if (currentElement === 'data_type') {
             var selectedType = $('#data_type').val();
             if (!selectedType) {
-                $('#year_container').hide();
+                // If topic is cleared, hide everything
+                $('#qol_data_type_container, #soc_data_type_container, #year_container, #town_container, #demographic_container').hide();
+                $('#qol_data_type, #soc_data_type, #year, #town, #demographic').val('');
+                $('#town-search').val('');
+            } else {
+                // If topic is changed (QOL to SOC or vice versa), clear everything below
+                $('#year_container, #town_container, #demographic_container').hide();
+                $('#year, #town, #demographic').val('');
+                $('#town-search').val('');
+                
+                // Show the appropriate data indicator container
+                if (selectedType === 'qol') {
+                    $('#qol_data_type_container').show();
+                    $('#soc_data_type_container').hide();
+                    $('#soc_data_type').val('');
+                    populateQOLDataType();
+                } else if (selectedType === 'soc') {
+                    $('#soc_data_type_container').show();
+                    $('#qol_data_type_container').hide();
+                    $('#qol_data_type').val('');
+                    populateSocialCapitalDataType();
+                }
             }
+            return; // Exit early for topic changes
         }
         
-        // Additional special cases based on what changed
-        if (currentElement === 'year') {
-            $('#town_container').show(); // After changing year, always show town next
-            $('#qol_data_type_container, #soc_data_type_container, #demographic_container').hide();
-        } else if (currentElement === 'town') {
-            var dataType = $('#data_type').val();
-            if (dataType === 'qol') {
-                $('#qol_data_type_container').show();
-                $('#soc_data_type_container').hide();
-            } else if (dataType === 'soc') {
-                $('#soc_data_type_container').show();
-                $('#qol_data_type_container').hide();
+        // For all other elements, only clear if the current element is empty
+        var currentValue = $('#' + currentElement).val();
+        
+        if (!currentValue) {
+            // Clear and hide all elements after the current one
+            for (var i = currentIndex + 1; i < order.length; i++) {
+                var elementId = order[i];
+                
+                // Reset values
+                $('#' + elementId).val('');
+                
+                // Hide containers
+                if (elementId === 'qol_data_type') {
+                    $('#qol_data_type_container').hide();
+                } else if (elementId === 'soc_data_type') {
+                    $('#soc_data_type_container').hide();
+                } else if (elementId === 'town') {
+                    $('#town_container').hide();
+                    $('#town-search').val(''); // Clear town search input too
+                } else {
+                    $('#' + elementId + '_container').hide();
+                }
             }
-            $('#demographic_container').hide();
         }
     }
     
@@ -613,11 +629,19 @@ $(document).ready(function() {
             success: function(data) {
                 prepareVisualizationArea();
 
+                // Guarantee chart order: create all containers first, then fill them as data arrives
                 var chartsToRender = data.specific_options.length;
                 var chartsRendered = 0;
 
-                // For each specific demographic, generate a separate bar chart
-                $.each(data.specific_options, function(index, specificDemographic) {
+                // Create all containers in order
+                data.specific_options.forEach(function(specificDemographic) {
+                    var containerId = 'chart-' + specificDemographic.replace(/\s+/g, '-');
+                    var container = $('<div id="' + containerId + '" class="visualization-container"></div>');
+                    $('#visualization').append(container);
+                });
+
+                // For each specific demographic, fetch and render data into its container
+                data.specific_options.forEach(function(specificDemographic) {
                     var ajaxData = {
                         'town': selectedTown,
                         'demographic': selectedDemographic,
@@ -632,6 +656,8 @@ $(document).ready(function() {
                     } else if (dataType === 'soc') {
                         ajaxData.soc_data_type = selectedSocialCapitalType;
                     }
+
+                    var containerId = 'chart-' + specificDemographic.replace(/\s+/g, '-');
 
                     $.ajax({
                         url: query_data,
@@ -652,32 +678,22 @@ $(document).ready(function() {
                                     return { group: key, value: parseFloat(value) };
                                 });
                 
-                                var containerId = 'chart-' + specificDemographic.replace(/\s+/g, '-');
-                                var container = $('<div id="' + containerId + '" class="visualization-container"></div>');
-                                
                                 var demographicLabel = getHumanReadableLabel(specificDemographic);
-                                
-                                $('#visualization').append(container);
-                                
-                                // Pass the appropriate data type, either QOL or Social Capital
-                                var selectedDataType = (dataType === 'qol') ? selectedQOLType : selectedSocialCapitalType;
-                                
-                                renderBarChart(dataArray, containerId, demographicLabel, selectedYear, selectedTown, dataType, selectedDataType);
+                                // Render into the pre-existing container
+                                renderBarChart(dataArray, containerId, demographicLabel, selectedYear, selectedTown, dataType, selectedDataType = (dataType === 'qol') ? selectedQOLType : selectedSocialCapitalType);
                                 $('#visualization').css('visibility', 'visible');
-                
                                 chartsRendered++;
-                
                                 if (chartsRendered === chartsToRender) {
                                     scrollToVisualization();
                                 }
                             } else if (response.error) {
-                                $('#visualization').append(`<p class="error-message" style="color: red;">Error: ${response.error}</p>`);
+                                $('#' + containerId).append(`<p class=\"error-message\" style=\"color: red;\">Error: ${response.error}</p>`);
                                 chartsRendered++;
                             }
                         },
                         error: function(xhr, status, error) {
                             console.error("Error: " + error);
-                            $('#visualization').append(`<p class="error-message" style="color: red;">Error: Unable to fetch data. Please try again later.</p>`);
+                            $('#' + containerId).append(`<p class=\"error-message\" style=\"color: red;\">Error: Unable to fetch data. Please try again later.</p>`);
                             chartsRendered++;
                         }
                     });
@@ -813,23 +829,23 @@ $(document).ready(function() {
             // Supportiveness, Open to Ideas, Well-kept Property (has vsa/vsd options)
             else if (firstKey.includes('scsupportive_') || firstKey.includes('scopenideas_') || firstKey.includes('cswellkept_')) {
                 labels = {
-                    'vsa': 'Very Strongly Agree',
-                    'sa': 'Strongly Agree',
+                    'vsa': 'V. Strong Agree',
+                    'sa': 'Strong Agree',
                     'a': 'Agree',
                     'n': 'Neutral',
                     'd': 'Disagree',
-                    'sd': 'Strongly Disagree',
-                    'vsd': 'Very Strongly Disagree'
+                    'sd': 'Strong Disagree',
+                    'vsd': 'V. Strong Disagree'
                 };
                 
                 colorScale = {
-                    'Very Strongly Agree': '#388E3C',
-                    'Strongly Agree': '#81C784',
+                    'V. Strong Agree': '#388E3C',
+                    'Strong Agree': '#81C784',
                     'Agree': '#A5D6A7',
                     'Neutral': '#EEEEEE',
                     'Disagree': '#FFCC80',
-                    'Strongly Disagree': '#FFAB91',
-                    'Very Strongly Disagree': '#E57373'
+                    'Strong Disagree': '#FFAB91',
+                    'V. Strong Disagree': '#E57373'
                 };
             }
             // Organization membership types (1plus, 2plus, etc.)
@@ -907,14 +923,14 @@ $(document).ready(function() {
             // GO SERV locations (has local/outside/dnu options)
             else if (firstKey.includes('goserv')) {
                 labels = {
-                    'local': 'In this community',
-                    'outside': 'Outside this community',
+                    'local': 'In community',
+                    'outside': 'Outside community',
                     'dnu': 'Do not use'
                 };
                 
                 colorScale = {
-                    'In this community': '#81C784',
-                    'Outside this community': '#64B5F6',
+                    'In community': '#81C784',
+                    'Outside community': '#64B5F6',
                     'Do not use': '#BCAAA4'
                 };
             }
@@ -939,19 +955,19 @@ $(document).ready(function() {
             // Default for other agree/disagree scales (sa/a/n/d/sd) patterns
             else {
                 labels = {
-                    'sa': 'Strongly Agree',
+                    'sa': 'Strong Agree',
                     'a': 'Agree',
                     'n': 'Neutral',
                     'd': 'Disagree',
-                    'sd': 'Strongly Disagree'
+                    'sd': 'Strong Disagree'
                 };
                 
                 colorScale = {
-                    'Strongly Agree': '#81C784',
+                    'Strong Agree': '#81C784',
                     'Agree': '#A5D6A7',
                     'Neutral': '#EEEEEE',
                     'Disagree': '#FFCC80',
-                    'Strongly Disagree': '#FFAB91'
+                    'Strong Disagree': '#FFAB91'
                 };
             }
         }
@@ -963,13 +979,36 @@ $(document).ready(function() {
             var newLabel = labels[keySuffix] || keySuffix;
             return { group: newLabel, value: d.value };
         });
+
+        // Check if labels are long and need rotation
+        var hasLongLabels = false;
+        var maxLabelLength = 0;
+        formattedData.forEach(function(d) {
+            if (d.group.length > maxLabelLength) {
+                maxLabelLength = d.group.length;
+            }
+        });
+        
+        // Determine if we need to rotate labels based on label length and number of categories
+        // With shortened labels, we can be less aggressive
+        if (maxLabelLength > 15 || formattedData.length > 6) {
+            hasLongLabels = true;
+        }
+
+        // Adjust margins based on label length
+        var adjustedMargin = { ...margin };
+        if (hasLongLabels) {
+            adjustedMargin.bottom = 100; // Increase for rotated labels
+            adjustedMargin.left = 80; // Increase left margin
+            adjustedMargin.right = 80; // Increase right margin
+        }
     
         // Append an SVG element for the chart with margins
         var svg = container.append("svg")
-            .attr("width", width + margin.left + margin.right)
-            .attr("height", height + margin.top + margin.bottom)
+            .attr("width", width + adjustedMargin.left + adjustedMargin.right)
+            .attr("height", height + adjustedMargin.top + adjustedMargin.bottom)
             .append("g")
-            .attr("transform", "translate(" + margin.left + "," + margin.top + ")"); // Adjusted translate for more space
+            .attr("transform", "translate(" + adjustedMargin.left + "," + adjustedMargin.top + ")");
     
         // X axis
         var x = d3.scaleBand()
@@ -977,9 +1016,25 @@ $(document).ready(function() {
             .domain(formattedData.map(function(d) { return d.group; }))
             .padding(0.2);
     
-        svg.append("g")
-            .attr("transform", "translate(0," + height + ")")
-            .call(d3.axisBottom(x));
+        var xAxis = svg.append("g")
+            .attr("transform", "translate(0," + height + ")");
+
+        if (hasLongLabels) {
+            // Rotate labels for better readability
+            xAxis.call(d3.axisBottom(x))
+                .selectAll("text")
+                .style("text-anchor", "end")
+                .attr("dx", "-.8em")
+                .attr("dy", ".15em")
+                .attr("transform", "rotate(-45)")
+                .style("font-size", "10px"); // Smaller font for rotated labels
+        } else {
+            // Normal horizontal labels
+            xAxis.call(d3.axisBottom(x))
+                .selectAll("text")
+                .style("text-anchor", "middle")
+                .style("font-size", "12px");
+        }
     
         // Y axis (set to a fixed range from 0 to 100)
         var y = d3.scaleLinear()

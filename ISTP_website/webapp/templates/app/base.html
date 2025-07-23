@@ -4,16 +4,94 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Iowa Small Towns Project</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    {% load static %}
+    <style>
+      body, html {
+        font-family: Calibri, Arial, sans-serif !important;
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+      .page-wrapper {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+      .content-wrapper {
+        flex: 1;
+      }
+      .isu-topbar {
+        background: white;
+        color: #C8102E;
+        font-size: 1.2rem;
+        padding: 12px 0;
+        border-bottom: 1px solid #e0e0e0;
+        font-weight: bold;
+      }
+      .isu-topbar .container-fluid {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding-left: 15px;
+        padding-right: 15px;
+      }
+      .isu-logo {
+        height: 25px;
+        width: auto;
+      }
+      .navbar {
+        background-color: #f8f9fa !important;
+        border-bottom: 1px solid #e0e0e0;
+        padding: 10px 0;
+      }
+      .navbar-brand {
+        color: #C8102E !important;
+        font-weight: bold;
+        font-size: 1.3rem;
+      }
+      .navbar-nav .nav-link {
+        color: #C8102E !important;
+        font-weight: bold;
+        text-decoration: underline;
+        margin: 0 10px;
+      }
+      .navbar-nav .nav-link:hover {
+        color: #8B0000 !important;
+      }
+      .navbar-toggler {
+        border-color: #C8102E;
+      }
+      .navbar-toggler-icon {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(200, 16, 46, 0.75)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+      }
+    </style>
   </head>
   <body>
-    {% include 'app/navbar.html' %}    
-    <br>
-        {% block content %}
+    <div class="page-wrapper">
+      <!-- Top Bar -->
+      <div class="isu-topbar">
+        <div class="container-fluid">
+          <div>
+            <img src="{% static 'css/ISU_Logo.png' %}" alt="Iowa State University" class="isu-logo">
+          </div>
+          <div>College of Agriculture and Life Sciences</div>
+        </div>
+      </div>
 
+      <!-- Navigation Bar -->
+      {% include 'app/navbar.html' %}
+
+      <!-- Main Content -->
+      <div class="content-wrapper">
+        {% block content %}
         {% endblock %}
-    </br>
-       
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+      </div>
+
+      <!-- Footer -->
+      {% include 'app/footer.html' %}
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
   </body>
 </html>

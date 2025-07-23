@@ -1,0 +1,458 @@
+body {
+    font-family: 'Roboto', Arial, sans-serif;
+    background-color: #f8f9fa;
+    color: #333;
+    line-height: 1.6;
+    margin: 0;
+    padding: 0;
+}
+
+h1 {
+    text-align: center;
+    margin: 40px 0;
+    color: #2c3e50;
+    font-weight: 300;
+}
+
+.instruction {
+    max-width: 800px;
+    margin: 30px auto;
+    background: #fff;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.instruction h4 {
+    margin-bottom: 20px;
+    text-align: center;
+    color: #2c3e50;
+    font-weight: 500;
+}
+
+.instruction ul {
+    list-style: none;
+    padding: 0;
+}
+
+.instruction li {
+    margin-bottom: 12px;
+    line-height: 1.5;
+    text-align: left;
+    padding-left: 1.5em;
+    position: relative;
+}
+
+.instruction li:before {
+    content: "→";
+    position: absolute;
+    left: 0;
+    color: #3498db;
+    font-weight: bold;
+}
+
+form#selection-form {
+    max-width: 600px;
+    margin: 30px auto;
+    padding: 30px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+form#selection-form label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #2c3e50;
+    text-align: left;
+}
+
+form#selection-form select,
+#town-search {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 20px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background-color: #fff;
+    font-size: 16px;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23007CB2%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px top 50%;
+    background-size: 12px auto;
+}
+
+form#selection-form select:focus,
+#town-search:focus {
+    border-color: #3498db;
+    box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+    outline: none;
+}
+
+.button-container {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+form#selection-form button {
+    display: inline-block;
+    width: calc(50% - 5px);
+    max-width: 200px;
+    padding: 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 500;
+    transition: background-color 0.3s, transform 0.1s;
+}
+
+form#selection-form button[type="submit"] {
+    background-color: #3498db;
+    color: white;
+}
+
+form#selection-form button[type="submit"]:hover {
+    background-color: #2980b9;
+}
+
+form#selection-form button#reset-form {
+    background-color: #95a5a6;
+    color: white;
+}
+
+form#selection-form button#reset-form:hover {
+    background-color: #7f8c8d;
+}
+
+form#selection-form button:active {
+    transform: translateY(1px);
+}
+
+#qol_data_type_container {
+    display: none;
+}
+
+#visualization {
+    width: 100%;
+    max-width: 1200px;
+    margin: 40px auto;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 30px;
+    visibility: hidden;
+}
+
+.visualization-container {
+    width: calc(50% - 15px);
+    padding: 20px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    position: relative;
+    overflow: visible;
+}
+
+@media (max-width: 1024px) {
+    .visualization-container {
+        width: 100%;
+    }
+}
+
+.download-button {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 5px;
+    z-index: 10;
+}
+
+.download-icon {
+    width: 20px;
+    height: 20px;
+    fill: #3498db;
+}
+
+.download-button:hover .download-icon {
+    fill: #2980b9;
+}
+
+.chart-label {
+    font-size: 18px;
+    font-weight: 500;
+    margin-bottom: 15px;
+    color: #2c3e50;
+}
+
+.label-container {
+    position: absolute;
+    top: 10px; /* Adjust as needed */
+    right: 10px; /* Adjust as needed */
+    background-color: rgba(255, 255, 255, 0.9); 
+    padding: 10px;
+    border-radius: 6px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    font-size: 13px;
+    color: #333;
+    text-align: left;
+    z-index: 1000;
+}
+
+.label-container strong {
+    color: #007bff;
+}
+
+.legend-box {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    list-style: none;
+    margin: 20px 0;
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.legend-box li {
+    margin: 5px 10px;
+    font-size: 0.9em;
+    color: #333;
+}
+
+/* Styling for jQuery UI Autocomplete */
+.ui-autocomplete {
+    max-height: 200px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    border: 1px solid #ddd;
+    border-radius: 0 0 4px 4px;
+    background-color: #fff;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.ui-autocomplete .ui-menu-item {
+    padding: 8px 10px;
+    font-size: 14px;
+    color: #333;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.ui-autocomplete .ui-menu-item:hover,
+.ui-autocomplete .ui-state-focus {
+    background-color: #f0f0f0;
+}
+
+.ui-helper-hidden-accessible {
+    display: none;
+}
+
+.error-message {
+    background-color: #ffebee;
+    border: 1px solid #ef9a9a;
+    border-radius: 4px;
+    padding: 10px;
+    margin-bottom: 20px;
+    color: #c62828;
+}
+
+.error-message ul {
+    margin: 0;
+    padding-left: 20px;
+}
+
+.error-message li {
+    margin-bottom: 5px;
+}
+
+text {
+    fill: #333 !important;
+    font-size: 14px !important;
+    font-family: 'Roboto', Arial, sans-serif !important;
+}
+
+/* Add styling for the progressive form */
+#selection-form > div {
+    margin-bottom: 20px;
+    padding: 15px;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+}
+
+#selection-form > div:hover {
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+#selection-form label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: #333;
+}
+
+#selection-form select,
+#selection-form input[type="text"] {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+#selection-form select:focus,
+#selection-form input[type="text"]:focus {
+    border-color: #4CAF50;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+}
+
+.button-container {
+    margin-top: 30px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.button-container button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s;
+}
+
+.button-container button[type="submit"] {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.button-container button[type="submit"]:hover {
+    background-color: #45a049;
+}
+
+#reset-form {
+    background-color: #f44336;
+    color: white;
+}
+
+#reset-form:hover {
+    background-color: #d32f2f;
+}
+
+.error-message {
+    color: #f44336;
+    margin-bottom: 20px;
+    padding: 10px;
+    background-color: #ffebee;
+    border-left: 4px solid #f44336;
+    border-radius: 4px;
+}
+
+.visualization-container {
+    margin-top: 40px;
+    padding: 20px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.download-button {
+    background-color: #2196F3;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 8px 15px;
+    cursor: pointer;
+    margin-top: 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.download-button:hover {
+    background-color: #0b7dda;
+}
+
+.download-icon {
+    width: 18px;
+    height: 18px;
+    fill: white;
+}
+
+/* Animation for progressive reveal */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+#selection-form > div:not(.button-container) {
+    animation: fadeIn 0.3s ease-out;
+}
+
+/* Make the instruction section more appealing */
+.instruction {
+    background-color: #e8f5e9;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 30px;
+    border-left: 5px solid #4CAF50;
+}
+
+.instruction h4 {
+    margin-top: 0;
+    color: #2e7d32;
+}
+
+.instruction ul {
+    padding-left: 20px;
+}
+
+.instruction li {
+    margin-bottom: 8px;
+}
+
+/* Bar chart styling */
+#visualization {
+    visibility: hidden;
+    margin-top: 40px;
+}
+
+.label-container {
+    margin-bottom: 15px;
+    padding: 10px;
+    background-color: #f5f5f5;
+    border-radius: 4px;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.label-container strong {
+    color: #333;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .button-container {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .button-container button {
+        width: 100%;
+    }
+}

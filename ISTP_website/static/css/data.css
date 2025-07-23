@@ -43,14 +43,6 @@ h1 {
     position: relative;
 }
 
-.instruction li:before {
-    content: "→";
-    position: absolute;
-    left: 0;
-    color: #3498db;
-    font-weight: bold;
-}
-
 form#selection-form {
     max-width: 600px;
     margin: 30px auto;
@@ -456,3 +448,27 @@ text {
         width: 100%;
     }
 }
+
+.income-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap: 30px;
+    width: 100%;
+    max-width: 900px;
+    margin: 0 auto 40px auto;
+}
+
+.income-grid .visualization-container {
+    width: 100%;
+    min-width: 0;
+    margin-top: 0;
+}
+
+@media (max-width: 900px) {
+    .income-grid {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto;
+    }
+}
+
